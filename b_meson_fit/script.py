@@ -24,7 +24,7 @@ tf.enable_v2_behavior()
 class Script:
     """Script context manager class
     """
-    device_default = 'GPU:0'
+    device_default = 'CPU:0'
 
     def __init__(self, device=device_default):
         self.name = os.path.basename(os.path.splitext(sys.argv[0])[0])

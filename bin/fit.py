@@ -73,7 +73,7 @@ parser.add_argument(
     '--max-step',
     dest='max_step',
     type=int,
-    default=20_000,
+    default=20000,
     help='restart iteration if not converged after this many steps (default: 20000)'
 )
 parser.add_argument(
