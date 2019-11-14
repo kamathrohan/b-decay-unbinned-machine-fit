@@ -4,3 +4,4 @@ core
 .idea
 __pycache__
 results
+venv
