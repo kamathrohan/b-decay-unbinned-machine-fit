@@ -31,7 +31,8 @@ def nll(coeffs, events):
         events: Tensor of shape (N, 4) with axis 1 representing params [q2, cos_theta_k, cos_theta_l, phi]
 
     Returns:
-        Rank-1 tensor with shape (N)
+        Scalar: negative log likelihood
+
     """
     return -tf.reduce_sum(
         tf.math.log(
@@ -48,7 +49,7 @@ def normalized_nll(coeffs, events):
         events: Tensor of shape (N, 4) with axis 1 representing params [q2, cos_theta_k, cos_theta_l, phi]
 
     Returns:
-        Rank-1 tensor with shape (N)
+        Scalar: normalized negative log likelihood
     """
     return nll(coeffs, events) / tf.cast(tf.shape(events)[0], tf.float32)
 
