@@ -195,6 +195,7 @@ with bmf.Script(device=args.device) as script:
                     log.coefficients('fit_{}'.format(iteration), optimizer, signal_coeffs)
                 if optimizer.converged():
                     converged = True
+                    print(optimizer.get_hessian())
                     if args.csv_file is not None:
 
                         writer.write_coeffs(optimizer.normalized_nll.numpy(), fit_coeffs, script.timer_elapsed('fit'))

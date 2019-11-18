@@ -91,12 +91,14 @@ class Optimizer:
         return normalized_nll, grads, tf.math.abs(tf.reduce_max(grads))
 
 
-
-    def _get_hessian(self):
+    def get_hessian(self):
         with tf.GradientTape(persistent=True) as hess_tape:
+            with tf.GradientTape() as grad_tape:
                 normalized_nll = self._normalized_nll()
-        grad = hess_tape.gradient(normalized_nll, self.trainables)
-        grad_grads = [hess_tape.gradient(g, self.trainables) for g in grad]
+            grad = grad_tape.gradient(normalized_nll, self.trainables)
+            grad_grads = [hess_tape.gradient(g, self.trainables) for g in grad]
+        #hess_rows = [gg[tf.newaxis, ...] for gg in grad_grads]
+        #hessian = tf.concat(hess_rows, axis=0)
         return grad_grads
 
 
