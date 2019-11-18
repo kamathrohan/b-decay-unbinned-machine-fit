@@ -196,6 +196,7 @@ with bmf.Script(device=args.device) as script:
                 if optimizer.converged():
                     converged = True
                     if args.csv_file is not None:
+
                         writer.write_coeffs(optimizer.normalized_nll.numpy(), fit_coeffs, script.timer_elapsed('fit'))
                     break
                 if optimizer.step >= args.max_step:

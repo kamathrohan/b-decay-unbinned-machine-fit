@@ -72,21 +72,32 @@ class Optimizer:
         """
         if not self.grad_max:
             return False
+#        print(tf.hessians(self._normalized_nll,self.trainables))
         return self.grad_max.numpy() < self.grad_max_cutoff
 
     @tf.function
     def _get_gradients(self):
         """Calculate and apply gradients for this step"""
-        with tf.GradientTape() as tape:
+
+        #with tf.GradientTape() as tape:
             normalized_nll = self._normalized_nll()
         grads = tape.gradient(normalized_nll, self.trainables)
-
         if self.grad_clip:
             grads, _ = tf.clip_by_global_norm(grads, self.grad_clip)
 
         self.optimizer.apply_gradients(zip(grads, self.trainables))
 
+
         return normalized_nll, grads, tf.math.abs(tf.reduce_max(grads))
+
+
+
+    def _get_hessian(self):
+        with tf.GradientTape(persistent=True) as hess_tape:
+                normalized_nll = self._normalized_nll()
+        grad = hess_tape.gradient(normalized_nll, self.trainables)
+        grad_grads = [hess_tape.gradient(g, self.trainables) for g in grad]
+        return grad_grads
 
 
     def _normalized_nll(self):
