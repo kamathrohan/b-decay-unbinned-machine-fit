@@ -79,7 +79,7 @@ class Optimizer:
     def _get_gradients(self):
         """Calculate and apply gradients for this step"""
 
-        #with tf.GradientTape() as tape:
+        with tf.GradientTape() as tape:
             normalized_nll = self._normalized_nll()
         grads = tape.gradient(normalized_nll, self.trainables)
         if self.grad_clip:
