@@ -3,6 +3,7 @@ import tensorflow.compat.v2 as tf
 
 import b_meson_fit.coeffs as bmfc
 import b_meson_fit.signal as bmfs
+import numpy as np
 
 tf.enable_v2_behavior()
 
@@ -57,12 +58,26 @@ class Optimizer:
 
         self.normalized_nll = self._normalized_nll()
         self.grads = None
+        self.grads2 = None 
         self.grad_max = None
 
     def minimize(self):
         """Increment step counter and calculate gradients"""
         self.step.assign(self.step + 1)
-        self.normalized_nll, self.grads, self.grad_max = self._get_gradients()
+        
+        # With grads2 (wayyy slower)
+        #self.normalized_nll, self.grads, self.grads2 ,  self.grad_max = self._get_gradients()
+
+        # Without grads2
+        self.normalized_nll, self.grads ,  self.grad_max = self._get_gradients()
+
+
+
+        # First attempt to get Hessian matrix : 
+
+        #Hessian = self.get_hessian()
+        #print(Hessian)
+
 
     def converged(self):
         """Have all our coefficients finished training?
@@ -78,15 +93,17 @@ class Optimizer:
     def _get_gradients(self):
         """Calculate and apply gradients for this step"""
         with tf.GradientTape() as tape:
-            normalized_nll = self._normalized_nll()
-        grads = tape.gradient(normalized_nll, self.trainables)
+            with tf.GradientTape() as tape2:
+                normalized_nll = self._normalized_nll()
+                grads = tape.gradient(normalized_nll, self.trainables)
+                #grads2 = tape2.gradient(grads , self.trainables)
 
         if self.grad_clip:
             grads, _ = tf.clip_by_global_norm(grads, self.grad_clip)
 
         self.optimizer.apply_gradients(zip(grads, self.trainables))
 
-        return normalized_nll, grads, tf.math.abs(tf.reduce_max(grads))
+        return normalized_nll, grads ,  tf.math.abs(tf.reduce_max(grads))
 
 
     def _normalized_nll(self):
@@ -100,4 +117,41 @@ class Optimizer:
         """
         return bmfs.normalized_nll(self.fit_coeffs, self.signal_events)
 
+
+
+    
+    def _get_hessian(self):  
+
+        """
+        First attempt to get the hessian matrix 
+        Doesn't work, returns nan table 
+        """
+
+        n=len(self.grads)
+        H=np.zeros([n , n])
+        for i in range(len(self.grads)):
+            for j in range(len(self.grads)):
+                with tf.GradientTape() as tape1 :
+                    normalized_nll = self._normalized_nll()
+                    grads=tape1.gradient(normalized_nll , self.trainables[i])
+                    with tf.GradientTape() as tape2 :
+                        H[i][j]=tape2.gradient(grads , self.trainables[j])
+        return H
+                        
+          
+
+    def get_hessian(self):
+        with tf.GradientTape(persistent=True) as hess_tape:
+            with tf.GradientTape() as grad_tape:
+                normalized_nll = self._normalized_nll()
+            grad = grad_tape.gradient(normalized_nll, self.trainables)
+            grad_grads = [hess_tape.gradient(g, self.trainables)  for g in grad]
+        
+
+        hess=tf.stack(grad_grads)
+
+        return hess          
+
+        
+	
 
