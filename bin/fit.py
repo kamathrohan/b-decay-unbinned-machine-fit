@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """Fit amplitude coefficients to signal events"""
 
+#coucou
+
 import argparse
 import shutil
 import tensorflow.compat.v2 as tf
@@ -191,6 +193,11 @@ with bmf.Script(device=args.device) as script:
 
             while True:
                 optimizer.minimize()
+
+                # print the log likelihood as we minimize it 
+                #print(optimizer.normalized_nll)
+
+                
                 if args.log:
                     log.coefficients('fit_{}'.format(iteration), optimizer, signal_coeffs)
                 if optimizer.converged():
@@ -207,3 +214,22 @@ with bmf.Script(device=args.device) as script:
                         bmf.stderr('{} initialisation used so generating new signal'.format(args.fit_init))
                         signal_events = bmf.signal.generate(signal_coeffs, events_total=args.signal_count)
                     break
+
+# Did work but is it really what we want ? 
+#print(len(optimizer.grads2))
+#print(optimizer.grads2)
+
+
+
+# Did not work 
+#Hessian = tf.hessians(optimizer.normalized_nll , optimizer.trainables)
+Hessian= optimizer.get_hessian()
+Sig= - tf.linalg.inv(Hessian)
+
+errors=tf.linalg.diag_part(Sig)
+print(errors)
+
+
+
+# RuntimeError: tf.gradients is not supported when eager execution is enabled. Use tf.GradientTape instead
+
