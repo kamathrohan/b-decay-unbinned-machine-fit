@@ -64,19 +64,8 @@ class Optimizer:
     def minimize(self):
         """Increment step counter and calculate gradients"""
         self.step.assign(self.step + 1)
-        
-        # With grads2 (wayyy slower)
-        #self.normalized_nll, self.grads, self.grads2 ,  self.grad_max = self._get_gradients()
-
-        # Without grads2
         self.normalized_nll, self.grads ,  self.grad_max = self._get_gradients()
 
-
-
-        # First attempt to get Hessian matrix : 
-
-        #Hessian = self.get_hessian()
-        #print(Hessian)
 
 
     def converged(self):
@@ -126,10 +115,10 @@ class Optimizer:
      
 
     def get_hessian(self):
-        print(self.trainables)
         with tf.GradientTape(persistent=True) as hess_tape:
             with tf.GradientTape() as grad_tape:
-                normalized_nll = self._normalized_nll()
+                normalized_nll = - self._normalized_nll()
+                #normalized_nll = self._normalized_nll()
             grad = grad_tape.gradient(normalized_nll, self.trainables)
             grad_grads = [hess_tape.gradient(g, self.trainables)  for g in grad]
         

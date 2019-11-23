@@ -8,6 +8,7 @@ import shutil
 import tensorflow.compat.v2 as tf
 import tqdm
 
+
 import b_meson_fit as bmf
 
 tf.enable_v2_behavior()
@@ -215,21 +216,51 @@ with bmf.Script(device=args.device) as script:
                         signal_events = bmf.signal.generate(signal_coeffs, events_total=args.signal_count)
                     break
 
-# Did work but is it really what we want ? 
-#print(len(optimizer.grads2))
-#print(optimizer.grads2)
 
-# Did not work 
-#Hessian = tf.hessians(optimizer.normalized_nll , optimizer.trainables)
-Hessian = optimizer.get_hessian()
-Sig = tf.linalg.inv( Hessian)
+# First attempt to return the Hessian of the LL for error computation 
 
-errors = tf.linalg.diag_part(Sig)
-print(tf.math.sqrt(Sig))
+bol0=0
+if bol0==1 : 
+    # Returns the Hessian of the NLL
+    HessianLL = optimizer.get_hessian()
+    
+    Sig = tf.linalg.inv( HessianLL)
+    
+    errors = tf.linalg.diag_part(Sig)
 
-print(tf.linalg.matmul(Hessian,  Sig ))
+    """
+    print("The covariant matrix is given by :")
+    print(Sig)
+    """
+
+    print("The diagonal components of the covariant matrix are :")
+    print(errors)
 
 
-#print(optimizer.trainables)
+    """
+    print("Diagonal Hessian components are is given by :")
+    for i in range(10):
+        print(Hessian[i][i])
+    """
 
-# RuntimeError: tf.gradients is not supported when eager execution is enabled. Use tf.GradientTape instead
+
+    EIGEN=tf.linalg.eigh(HessianLL)
+    print("Eigenvalues of Hessian are :")
+    print(EIGEN[0])
+
+
+# Second try, computing individual single and double derivatives for w.r.t. parameter of index i 
+# Comparing to Hessian i bol0 seems OK 
+bol1=0
+if bol1==1 : 
+    #calculate single and double derivatives with respect to the nth parameter 
+    for i in range(10) : 
+        with tf.GradientTape() as tape1 : 
+            with tf.GradientTape() as tape2 :
+                normalized_nll = optimizer._normalized_nll()
+            grad1=tape2.gradient(normalized_nll , optimizer.trainables[i])
+            grad2=tape1.gradient(grad1 , optimizer.trainables[i])
+        PRINT="double derivative along "+ str(i)
+        print(PRINT)
+        print(grad2)
+        
