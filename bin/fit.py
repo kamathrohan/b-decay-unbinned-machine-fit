@@ -12,7 +12,6 @@ import b_meson_fit as bmf
 
 tf.enable_v2_behavior()
 
-
 def fit_init_value(arg):  # Handle --fit-init argument
     if arg in bmf.coeffs.fit_init_schemes:
         return arg
@@ -203,6 +202,7 @@ with bmf.Script(device=args.device) as script:
                 if optimizer.converged():
                     converged = True
                     if args.csv_file is not None:
+
                         writer.write_coeffs(optimizer.normalized_nll.numpy(), fit_coeffs, script.timer_elapsed('fit'))
                     break
                 if optimizer.step >= args.max_step:
@@ -219,17 +219,17 @@ with bmf.Script(device=args.device) as script:
 #print(len(optimizer.grads2))
 #print(optimizer.grads2)
 
-
-
 # Did not work 
 #Hessian = tf.hessians(optimizer.normalized_nll , optimizer.trainables)
-Hessian= optimizer.get_hessian()
-Sig= - tf.linalg.inv(Hessian)
+Hessian = optimizer.get_hessian()
+Sig = tf.linalg.inv( Hessian)
 
-errors=tf.linalg.diag_part(Sig)
-print(errors)
+errors = tf.linalg.diag_part(Sig)
+print(tf.math.sqrt(Sig))
+
+print(tf.linalg.matmul(Hessian,  Sig ))
 
 
+#print(optimizer.trainables)
 
 # RuntimeError: tf.gradients is not supported when eager execution is enabled. Use tf.GradientTape instead
-

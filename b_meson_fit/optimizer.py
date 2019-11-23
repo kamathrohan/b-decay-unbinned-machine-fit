@@ -87,23 +87,26 @@ class Optimizer:
         """
         if not self.grad_max:
             return False
+#        print(tf.hessians(self._normalized_nll,self.trainables))
         return self.grad_max.numpy() < self.grad_max_cutoff
 
     @tf.function
     def _get_gradients(self):
         """Calculate and apply gradients for this step"""
-        with tf.GradientTape() as tape:
-            with tf.GradientTape() as tape2:
-                normalized_nll = self._normalized_nll()
-                grads = tape.gradient(normalized_nll, self.trainables)
-                #grads2 = tape2.gradient(grads , self.trainables)
 
+        with tf.GradientTape() as tape:
+            normalized_nll = self._normalized_nll()
+        grads = tape.gradient(normalized_nll, self.trainables)
         if self.grad_clip:
             grads, _ = tf.clip_by_global_norm(grads, self.grad_clip)
 
         self.optimizer.apply_gradients(zip(grads, self.trainables))
 
-        return normalized_nll, grads ,  tf.math.abs(tf.reduce_max(grads))
+
+        return normalized_nll, grads, tf.math.abs(tf.reduce_max(grads))
+
+
+
 
 
     def _normalized_nll(self):
@@ -117,30 +120,29 @@ class Optimizer:
         """
         return bmfs.normalized_nll(self.fit_coeffs, self.signal_events)
 
+      
 
-
-    
-    def _get_hessian(self):  
-
-        """
-        First attempt to get the hessian matrix 
-        Doesn't work, returns nan table 
-        """
-
-        n=len(self.grads)
-        H=np.zeros([n , n])
-        for i in range(len(self.grads)):
-            for j in range(len(self.grads)):
-                with tf.GradientTape() as tape1 :
-                    normalized_nll = self._normalized_nll()
-                    grads=tape1.gradient(normalized_nll , self.trainables[i])
-                    with tf.GradientTape() as tape2 :
-                        H[i][j]=tape2.gradient(grads , self.trainables[j])
-        return H
-                        
-          
+        
+     
 
     def get_hessian(self):
+        print(self.trainables)
+        with tf.GradientTape(persistent=True) as hess_tape:
+            with tf.GradientTape() as grad_tape:
+                normalized_nll = self._normalized_nll()
+            grad = grad_tape.gradient(normalized_nll, self.trainables)
+            grad_grads = [hess_tape.gradient(g, self.trainables)  for g in grad]
+        
+
+        hess=tf.stack(grad_grads)
+        hess=tf.transpose(hess)
+
+        return hess          
+
+
+
+    def get_hessian2(self):
+
         with tf.GradientTape(persistent=True) as hess_tape:
             with tf.GradientTape() as grad_tape:
                 normalized_nll = self._normalized_nll()
@@ -151,7 +153,6 @@ class Optimizer:
         hess=tf.stack(grad_grads)
 
         return hess          
-
-        
+     
 	
 
