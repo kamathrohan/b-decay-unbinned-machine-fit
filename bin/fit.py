@@ -7,6 +7,7 @@ import argparse
 import shutil
 import tensorflow.compat.v2 as tf
 import tqdm
+from iminuit import Minuit
 
 
 import b_meson_fit as bmf
@@ -218,13 +219,14 @@ with bmf.Script(device=args.device) as script:
 
 
 # First attempt to return the Hessian of the LL for error computation 
+#print(optimizer.trainables)
 
 bol0=0
 if bol0==1 : 
     # Returns the Hessian of the NLL
     HessianLL = optimizer.get_hessian()
     
-    Sig = tf.linalg.inv( HessianLL)
+    Sig = tf.linalg.inv(HessianLL)
     
     errors = tf.linalg.diag_part(Sig)
 
@@ -263,4 +265,13 @@ if bol1==1 :
         PRINT="double derivative along "+ str(i)
         print(PRINT)
         print(grad2)
-        
+optcoeff = [i.numpy() for i in optimizer.fit_coeffs]
+
+def minuitnll(coeffs):
+    return bmf.signal.nll(coeffs, signal_events).numpy()
+m = Minuit.from_array_func(minuitnll,optcoeff,errordef=0.5, pedantic = False)
+m.migrad()
+m.hesse()
+print(optcoeff)
+print(m.values)
+print(m.errors)

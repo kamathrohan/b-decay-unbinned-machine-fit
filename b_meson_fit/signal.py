@@ -23,7 +23,7 @@ bw_k700_k892 = bmfbw.k700_k892_distribution_integrated()
 
 
 def nll(coeffs, events):
-    """
+    """X
     Return negative of the log likelihood for given events based on particular amplitude coefficients
 
     Args:
@@ -52,7 +52,6 @@ def normalized_nll(coeffs, events):
         Scalar: normalized negative log likelihood
     """
     return nll(coeffs, events) / tf.cast(tf.shape(events)[0], tf.float32)
-
 
 def generate(coeffs, events_total=100_000, batch_size=10_000_000):
     """
