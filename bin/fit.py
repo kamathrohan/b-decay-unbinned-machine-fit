@@ -275,3 +275,5 @@ m.hesse()
 print(optcoeff)
 print(m.values)
 print(m.errors)
+
+#TODO run hesse without mingrad? allow gradient descent only on the trainables?
