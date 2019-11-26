@@ -301,7 +301,7 @@ if bol2==1:
 
     #m.get_param_states()
     m.migrad()
-    m.covariance()
+    m.hesse()
     #print(optcoeff)
     print(m.values)
     print(m.errors)
