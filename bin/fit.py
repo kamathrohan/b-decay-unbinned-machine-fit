@@ -7,6 +7,7 @@ import argparse
 import shutil
 import tensorflow.compat.v2 as tf
 import tqdm
+import numpy as np
 from iminuit import Minuit
 
 
@@ -253,6 +254,7 @@ if bol0==1 :
 
 # Second try, computing individual single and double derivatives for w.r.t. parameter of index i 
 # Comparing to Hessian i bol0 seems OK 
+
 bol1=0
 if bol1==1 : 
     #calculate single and double derivatives with respect to the nth parameter 
@@ -264,16 +266,44 @@ if bol1==1 :
             grad2=tape1.gradient(grad1 , optimizer.trainables[i])
         PRINT="double derivative along "+ str(i)
         print(PRINT)
-        print(grad2)
-optcoeff = [i.numpy() for i in optimizer.fit_coeffs]
 
-def minuitnll(coeffs):
-    return bmf.signal.nll(coeffs, signal_events).numpy()
-m = Minuit.from_array_func(minuitnll,optcoeff,errordef=0.5, pedantic = False)
-m.migrad()
-m.hesse()
-print(optcoeff)
-print(m.values)
-print(m.errors)
+        print(grad2)
+
+
+#From the estimates outputted after a TF fit, we perform a further fit using minuit this time 
+#need to define the trainables appropriately (48 parameters in total but constraints to 28 )
+
+bol2=1
+if bol2==1:
+    optcoeff = [i.numpy() for i in optimizer.fit_coeffs]
+    
+    print(optimizer.fit_coeffs)
+    N=48
+    fx=np.zeros(N)
+    for j in range(N):
+        C=optimizer.fit_coeffs[j]
+        if C.numpy()==0:
+            fx[j]=1
+        else : 
+            fx[j]=0
+    print(fx)
+
+    #print(len(optimizer.fit_coeffs))
+
+    C0=optcoeff[0]
+    C1=optcoeff[1]
+    C2=optcoeff[2]
+    print(C0)
+    
+    def minuitnll(coeffs):
+        return bmf.signal.nll(coeffs, signal_events).numpy()
+    m = Minuit.from_array_func(minuitnll,optcoeff,errordef=0.5, fix=fx , pedantic = False)
+
+    #m.get_param_states()
+    m.migrad()
+    m.covariance()
+    #print(optcoeff)
+    print(m.values)
+    print(m.errors)
 
 #TODO run hesse without mingrad? allow gradient descent only on the trainables?
