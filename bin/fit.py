@@ -178,7 +178,8 @@ with bmf.Script(device=args.device) as script:
         script.timer_start('fit')
 
         signal_events = bmf.signal.generate(signal_coeffs, events_total=args.signal_count)
-
+        print("Number of events per simution is :")
+        print(args.signal_count)
         attempt = 1
         converged = False
         while not converged:
@@ -195,9 +196,6 @@ with bmf.Script(device=args.device) as script:
 
             while True:
                 optimizer.minimize()
-
-                # print the log likelihood as we minimize it 
-                #print(optimizer.normalized_nll)
 
                 
                 if args.log:
@@ -277,12 +275,11 @@ bol2=1
 if bol2==1:
     optcoeff = [i.numpy() for i in optimizer.fit_coeffs]
     
-    print(optimizer.fit_coeffs)
+    print(optcoeff)
     N=48
     fx=np.zeros(N)
     for j in range(N):
-        C=optimizer.fit_coeffs[j]
-        if C.numpy()==0:
+        if optcoeff[j]==0 or optcoeff[j]==1  :
             fx[j]=1
         else : 
             fx[j]=0
@@ -293,7 +290,7 @@ if bol2==1:
     C0=optcoeff[0]
     C1=optcoeff[1]
     C2=optcoeff[2]
-    print(C0)
+    #print(C0)
     
     def minuitnll(coeffs):
         return bmf.signal.nll(coeffs, signal_events).numpy()
@@ -307,3 +304,7 @@ if bol2==1:
     print(m.errors)
 
 #TODO run hesse without mingrad? allow gradient descent only on the trainables?
+
+
+#check variations w.r.t. individual parameters
+ 

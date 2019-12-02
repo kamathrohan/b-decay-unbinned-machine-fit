@@ -5,14 +5,22 @@ import b_meson_fit.integrate as bmfi
 
 tf.enable_v2_behavior()
 
-# See p45 of 2018 PDG - K*0(700)
+# S-wave component:
+
+# See p49 of 2018 PDG - K*0(700)
 mass_k700 = tf.constant(0.824)  # 824 MeV
 decay_width_k700 = tf.constant(0.478)  # 478 MeV
 # See p868 of 2012 PDG (Used in original paper) - K*0(800)
 # # mass_k700 = tf.constant(0.682)  # 824 MeV
 # # decay_width_k700 = tf.constant(0.547)  # 478 MeV
 
-# See p46 of 2018 PDG - K*0(892)
+# See p49 of 2018 PDG - K*0(1430)
+mass_k1430 = tf.constant(1.425)
+decay_width_k1430 = tf.constant(0.270)
+
+# P-wave component:
+
+# See p49 of 2018 PDG - K*0(892)
 mass_k892 = tf.constant(0.89555)  # 895.55 MeV
 decay_width_k892 = tf.constant(0.0473)  # 47.3 MeV
 # See p870 of 2012 PDG (Used in original paper) - K*0(892)
@@ -25,6 +33,7 @@ mass_pi_minus = tf.constant(0.13957018)  # 139.57018 MeV
 integration_max = tf.constant(100.0)
 integration_dt = tf.constant(0.00025)
 
+""" Define Breit-Wigner distributions for individual k700 , k892 and k1430 resonances """
 
 def k700_distribution(mass):
     """Calculate normalized relativistic Breit-Wigner distribution value for K(700) at given mass"""
@@ -38,6 +47,7 @@ def k700_distribution_integrated():
     return _integrate_distribution_around_k892(k700_distribution)
 
 
+
 def k892_distribution(mass):
     """Calculate normalized relativistic Breit-Wigner distribution value for K(892) at given mass"""
     if k892_distribution.norm is None:
@@ -48,6 +58,24 @@ def k892_distribution(mass):
 def k892_distribution_integrated():
     """Integrate normalized relativistic Breit-Wigner distribution for K(892) around K(892) mass"""
     return _integrate_distribution_around_k892(k892_distribution)
+
+
+
+def k1430_distribution(mass):
+    """Calculate normalized relativistic Breit-Wigner distribution value for K(1439) at given mass"""
+    if k1430_distribution.norm is None:
+        k1430_distribution.norm = _norm(_k1430_distribution_unnormalized)
+    return _k1430_distribution_unnormalized(mass) / k700_distribution.norm
+
+
+def k1430_distribution_integrated():
+    """Integrate normalized relativistic Breit-Wigner distribution for K(1430) around K(892) mass"""
+    return _integrate_distribution_around_k892(k1430_distribution)
+
+
+
+
+""" Define Breit-Wigner distribution for join k700 , k892 and k1430 resonances """
 
 
 def k700_k892_distribution(mass):
@@ -87,6 +115,8 @@ def _k700_amplitude(mass):
 
 def _k892_amplitude(mass):
     return _amplitude(mass, 1, mass_k892, decay_width_k892)
+
+
 
 
 def _integrate_distribution_around_k892(distribution):
