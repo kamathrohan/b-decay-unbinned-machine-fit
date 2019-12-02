@@ -9,7 +9,7 @@ import tensorflow.compat.v2 as tf
 import tqdm
 import numpy as np
 from iminuit import Minuit
-
+import time
 
 import b_meson_fit as bmf
 
@@ -116,7 +116,7 @@ parser.add_argument(
     '--signal-count',
     dest='signal_count',
     type=int,
-    default=2400,
+    default=9600,
     help='number of signal events to generated per fit (default: 2400)'
 )
 parser.add_argument(
@@ -294,6 +294,7 @@ if bol2==1:
     
     def minuitnll(coeffs):
         return bmf.signal.nll(coeffs, signal_events).numpy()
+    t0 = time.time()
     m = Minuit.from_array_func(minuitnll,optcoeff,errordef=0.5, fix=fx , pedantic = False)
 
     #m.get_param_states()
@@ -302,7 +303,8 @@ if bol2==1:
     #print(optcoeff)
     print(m.values)
     print(m.errors)
-
+    t1 = time.time()
+    print("Minuit Time:", t1-t0)
 #TODO run hesse without mingrad? allow gradient descent only on the trainables?
 
 
