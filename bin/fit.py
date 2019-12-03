@@ -116,7 +116,7 @@ parser.add_argument(
     '--signal-count',
     dest='signal_count',
     type=int,
-    default=9600,
+    default=24000,
     help='number of signal events to generated per fit (default: 2400)'
 )
 parser.add_argument(
@@ -155,6 +155,7 @@ with bmf.Script(device=args.device) as script:
         log = bmf.Log(script.name)
 
     signal_coeffs = bmf.coeffs.signal(args.signal_model)
+    print("Input Signals:", [i.numpy() for i in signal_coeffs])
 
     if args.csv_file is not None:
         writer = bmf.FitWriter(args.csv_file, signal_coeffs)
@@ -275,7 +276,7 @@ bol2=1
 if bol2==1:
     optcoeff = [i.numpy() for i in optimizer.fit_coeffs]
     
-    print(optcoeff)
+    print("Tensorflow Coeffs" , optcoeff)
     N=48
     fx=np.zeros(N)
     for j in range(N):

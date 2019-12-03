@@ -12,7 +12,7 @@ class Optimizer:
     # AMSGrad is used as the optimizer as Adam suffers from exploding gradients on the earlier converged
     #  converged coefficients before all have converged.
     opt_name_default = 'AMSGrad'
-    learning_rate_default = 0.20
+    learning_rate_default = 0.05
     grad_clip_default = None
     grad_max_cutoff_default = 5e-7
 
