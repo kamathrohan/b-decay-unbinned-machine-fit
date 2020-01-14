@@ -155,7 +155,8 @@ with bmf.Script(device=args.device) as script:
         log = bmf.Log(script.name)
 
     signal_coeffs = bmf.coeffs.signal(args.signal_model)
-    print("Input Signals:", [i.numpy() for i in signal_coeffs])
+    coefs_ini=[i.numpy() for i in signal_coeffs]
+    print("Input Signals:", coefs_ini)
 
     if args.csv_file is not None:
         writer = bmf.FitWriter(args.csv_file, signal_coeffs)
@@ -291,7 +292,11 @@ bol2=1
 if bol2==1:
     optcoeff = [i.numpy() for i in optimizer.fit_coeffs]
     
-    print("Tensorflow Coeffs" , optcoeff)
+    #print("Tensorflow Coeffs:" , optcoeff)
+
+    print("Difference:" , 100*(np.asarray(optcoeff)-np.asarray(coefs_ini))/np.asarray(coefs_ini))
+    
+    
     N=48
     fx=np.zeros(N)
     for j in range(N):
@@ -318,8 +323,6 @@ if bol2==1:
     m.migrad()
     m.hesse()
     
-    
-    m.draw_profile(optcoeff[0])
     #print(optcoeff)
     #print(m.values)
     #print(m.errors)
