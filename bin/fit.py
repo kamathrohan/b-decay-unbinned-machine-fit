@@ -116,7 +116,7 @@ parser.add_argument(
     '--signal-count',
     dest='signal_count',
     type=int,
-    default=24000,
+    default=2400,
     help='number of signal events to generated per fit (default: 2400)'
 )
 parser.add_argument(
@@ -218,6 +218,11 @@ with bmf.Script(device=args.device) as script:
                     break
 
 
+
+
+
+
+
 # First attempt to return the Hessian of the LL for error computation 
 #print(optimizer.trainables)
 
@@ -251,6 +256,11 @@ if bol0==1 :
     print(EIGEN[0])
 
 
+
+
+
+
+
 # Second try, computing individual single and double derivatives for w.r.t. parameter of index i 
 # Comparing to Hessian i bol0 seems OK 
 
@@ -267,6 +277,11 @@ if bol1==1 :
         print(PRINT)
 
         print(grad2)
+
+
+
+
+
 
 
 #From the estimates outputted after a TF fit, we perform a further fit using minuit this time 
@@ -295,6 +310,44 @@ if bol2==1:
     
     def minuitnll(coeffs):
         return bmf.signal.nll(coeffs, signal_events).numpy()
+
+    t0 = time.time()
+    m = Minuit.from_array_func(minuitnll,optcoeff,errordef=0.5, fix=fx )
+
+    #m.get_param_states()
+    m.migrad()
+    m.hesse()
+    
+    
+    m.draw_profile(optcoeff[0])
+    #print(optcoeff)
+    #print(m.values)
+    #print(m.errors)
+    t1 = time.time()
+    print("Minuit Time:", t1-t0)
+#TODO run hesse without mingrad? allow gradient descent only on the trainables?
+
+
+#check variations w.r.t. individual parameters
+bol3=0
+if bol3==1:
+    optcoeff = [i.numpy() for i in optimizer.fit_coeffs]
+    
+    print("Tensorflow Coeffs" , optcoeff)
+    N=48
+    fx=np.ones(N)
+    fx[0]=0
+
+
+    #print(len(optimizer.fit_coeffs))
+
+    C0=optcoeff[0]
+    C1=optcoeff[1]
+    C2=optcoeff[2]
+    #print(C0)
+    
+    def minuitnll(coeffs):
+        return bmf.signal.nll(coeffs, signal_events).numpy()
     t0 = time.time()
     m = Minuit.from_array_func(minuitnll,optcoeff,errordef=0.5, fix=fx , pedantic = False)
 
@@ -306,8 +359,4 @@ if bol2==1:
     print(m.errors)
     t1 = time.time()
     print("Minuit Time:", t1-t0)
-#TODO run hesse without mingrad? allow gradient descent only on the trainables?
-
-
-#check variations w.r.t. individual parameters
  
