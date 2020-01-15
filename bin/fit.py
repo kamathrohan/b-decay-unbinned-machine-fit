@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 """Fit amplitude coefficients to signal events"""
 
-#coucou
-
 import argparse
 import shutil
 import tensorflow.compat.v2 as tf
