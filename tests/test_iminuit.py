@@ -24,7 +24,7 @@ fix_array=[
 1,1,1,
 1,1,1,
 1,1,1,
-1,1,1,
+1,1,
 1,1,1,
 1,1,1,
 ]
@@ -56,10 +56,8 @@ Ncall=1000
 
 def nll(signal_coeffs):
     """Get the normalized negative log likelihood
-
     Working with the normalised version ensures we don't need to re-optimize hyper-parameters when we
     change signal event numbers.
-
     Returns:
         Scalar tensor
     """
