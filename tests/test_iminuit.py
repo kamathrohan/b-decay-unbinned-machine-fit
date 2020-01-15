@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 #Define boolean sequence of variables to keep fixed 
 fix_array=[
-0,0,0,
+0,1,1,
 1,1,1,
 1,1,1,
 1,1,1,
@@ -95,16 +95,16 @@ def plot_fixed(m , Coef0 ,fix_array , amplitude_latex_names):
 
     #Different case if only one plot or more
     if len(ind)==1 : 
-        print(ind[0])
-        X , Y =m.profile(m.parameters[ind])
+        i0=ind[0]
+        X , Y =m.profile(m.parameters[i0])
         axs.plot(X , Y , label='NLL')
         ymin, ymax = axs.get_ylim()
-        axs.vlines(Coef0[ind] , ymin , ymax , label='init value')
-        X , Y =m.profile(m.parameters[ind])
-        axs.set(xlabel=LaTex_labels[ind], ylabel=r'NLL')
-        Xmin , Xmax = m.values[ind]-m.errors[ind] ,  m.values[ind]+m.errors[i] 
+        axs.vlines(Coef0[i0] , ymin , ymax , label='init value')
+        X , Y =m.profile(m.parameters[i0])
+        axs.set(xlabel=LaTex_labels[i0], ylabel=r'NLL')
+        Xmin , Xmax = m.values[i0]-m.errors[i0] ,  m.values[i0]+m.errors[i0] 
         axs.axvspan(Xmin, Xmax, alpha=0.1, color='red' , label= 'interval')
-        ax.set_title('Fit for '+LaTex_labels[ind]+'with N='+str(Ncall))
+        axs.set_title('Fit for '+LaTex_labels[i0]+'with N='+str(Ncall))
         axs.legend()
     else : 
         for i in ind:
