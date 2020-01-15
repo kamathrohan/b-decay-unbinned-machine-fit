@@ -6,6 +6,7 @@ import b_meson_fit.signal as bmfs
 import time 
 from iminuit import Minuit 
 import matplotlib.pyplot as plt 
+from tqdm import tqdm 
 #Define names #
 
 
@@ -24,7 +25,7 @@ fix_array=[
 1,1,1,
 1,1,1,
 1,1,1,
-1,1,
+1,1,1,
 1,1,1,
 1,1,1,
 ]
@@ -53,7 +54,6 @@ amplitude_latex_names = [
 Ncall=1000
 
 
-
 def nll(signal_coeffs):
     """Get the normalized negative log likelihood
     Working with the normalised version ensures we don't need to re-optimize hyper-parameters when we
@@ -71,16 +71,13 @@ def LaTex_names(amplitude_latex_names):
             LaTex_labels.append(j+i+')')
     return LaTex_labels
 
-
 def set_coef(Coef_INIT , Coef0,  fix_array ) :
     for i in range(len(Coef_INIT)):
         if fix_array[i]==1 :
             Coef_INIT[i]=  Coef0[i]
     return Coef_INIT
 
-
-
-def plot_fixed(m , Coef0 ,fix_array , amplitude_latex_names):
+def plot_fixed(m , Coef0 ,fix_array , amplitude_latex_names, coeffout,show = True, save = False):
     #First find index of non fixed parameters 
     ind=[]
     for i in range(len(fix_array)):
@@ -104,7 +101,7 @@ def plot_fixed(m , Coef0 ,fix_array , amplitude_latex_names):
         axs.set(xlabel=LaTex_labels[i0], ylabel=r'NLL')
         Xmin , Xmax = m.values[i0]-m.errors[i0] ,  m.values[i0]+m.errors[i0] 
         axs.axvspan(Xmin, Xmax, alpha=0.1, color='red' , label= 'interval')
-        axs.set_title('Fit for '+LaTex_labels[i0]+'with N='+str(Ncall))
+        axs.set_title('Fit for '+LaTex_labels[i0]+'with N='+str(Ncall)+'\n Expected Value:'+str(Coef0[i0])+' Actual Value:'+str(coeffout[i0]))
         axs.legend()
     else : 
         for i in ind:
@@ -124,41 +121,72 @@ def plot_fixed(m , Coef0 ,fix_array , amplitude_latex_names):
             if n2==n:
                 n2=0
                 n1+=1
-    
     plt.tight_layout()
-    plt.show()
-
+    if save:
+        plt.savefig('./tests/likelihood_profiles/'+LaTex_labels[i0]+'.png')
+    if show:
+        plt.show()
 
 ##   Initialize coefficients 
-signal_coeffs = bmf.coeffs.signal(bmf.coeffs.SM)
-Coef0=[i.numpy() for i in signal_coeffs]
-print("Ideal coeffs for SM:", Coef0 )
+def generate(events = 24000, fix_array = fix_array, verbose = False):
+    """
+    Generate Data for fitting
+    Returns Amplitude Coefficients, and events 
+    """
 
-A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_default)
-Coef_INIT=[A[i].numpy() for i in range(len(A))]
+    signal_coeffs = bmf.coeffs.signal(bmf.coeffs.SM)
+    Coef0=[i.numpy() for i in signal_coeffs] 
+    if verbose:  
+        print("Ideal coeffs for SM:", Coef0 )
+    t0=time.time()
+    signal_events = bmf.signal.generate(signal_coeffs, events_total=events)
+    t1=time.time()
+    if verbose:
+        print("Time taken to generate data:", t1-t0)
+    return  Coef0, signal_events
+def minuitfit(Coef0, signal_events,fix_array, Ncall=1000,verbose = False):
+    A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_default)
+    Coef_INIT=[A[i].numpy() for i in range(len(A))]
+    Coef_INIT=set_coef(Coef_INIT, Coef0, fix_array)
+    if verbose:
+        print("Initial coeffs for minuit fit:", Coef_INIT)
+    m = Minuit.from_array_func(nll,Coef_INIT, fix= fix_array , errordef=1, pedantic = False)
+    t0=time.time()
+    m.migrad( ncall=Ncall)
+    t1=time.time()
+    if verbose:
+        print("Time taken to fit :", t1-t0)
+    ##   Print fit results 
+    Coef_OUT=[m.values[i] for i in range(len(m.values))]
+    if verbose:
+        print(Coef_OUT)
+        print('NLL for final set of coeffs:' , nll(Coef_OUT))
+    return m, Coef0, Coef_OUT
 
 
-##   Generate data to fit 
-t0=time.time()
-signal_events = bmf.signal.generate(signal_coeffs, events_total=24000)
-t1=time.time()
-print("Time taken to generate data:", t1-t0)
-
-##   Perform minuit fit 
-Coef_INIT=set_coef(Coef_INIT, Coef0, fix_array)
-print("Initial coeffs for minuit fit:", Coef_INIT)
-m = Minuit.from_array_func(nll,Coef_INIT, fix= fix_array , errordef=1, pedantic = False)
-t0=time.time()
-m.migrad( ncall=Ncall)
-t1=time.time()
-print("Time taken to fit :", t1-t0)
 
 
-##   Print fit results 
-Coef_OUT=[m.values[i] for i in range(len(m.values))]
-print(Coef_OUT)
-print('NLL for final set of coeffs:' , nll(Coef_OUT))
 
-
-##   Plot non fixed parameters 
-plot_fixed(m , Coef0, fix_array , amplitude_latex_names)
+for i in tqdm(range(48)):
+    array =[
+        1,1,1,
+        1,1,1,
+        1,1,1,
+        1,1,1,
+        1,1,1,
+        1,1,1,
+        1,1,1,
+        1,1,1,
+        1,1,1,
+        1,1,1,
+        1,1,1,
+        1,1,1,
+        1,1,1,
+        1,1,1,
+        1,1,1,
+        1,1,1,
+        ]
+    array[i] = 0
+    coeffs, signal_events = generate(fix_array = array)
+    m , Coef0, Coef_OUT = minuitfit(coeffs,signal_events,fix_array = array, Ncall = 1000)
+    plot_fixed(m , Coef0, array , amplitude_latex_names,Coef_OUT,show = False, save=True)
