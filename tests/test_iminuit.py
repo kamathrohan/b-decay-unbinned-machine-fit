@@ -164,4 +164,3 @@ print('NLL for final set of coeffs:' , nll(Coef_OUT))
 
 ##   Plot non fixed parameters 
 plot_fixed(m , Coef0, fix_array , amplitude_latex_names)
-
