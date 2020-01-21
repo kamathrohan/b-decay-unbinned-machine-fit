@@ -216,6 +216,15 @@ def array_out(m):
     return OUT
 
 
+def array_out_long(m):
+    n=len(m.parameters)
+    OUT = []
+    for i in range(n):
+        OUT.append(m.values[i])
+        OUT.append(m.errors[i])
+    return OUT
+
+
 array=[
 0,0,0,
 0,0,0,
@@ -243,3 +252,4 @@ print(OUT)
 '''
 #save_path = './Minuit/Test/'
 #plot_profiles(m , Coef0 ,Coef_OUT,fix_array , amplitude_latex_names, save_path , show = False, save = False)
+ 
