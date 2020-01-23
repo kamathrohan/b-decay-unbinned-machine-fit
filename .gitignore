@@ -1,5 +1,4 @@
 core
-*.csv
 !b_meson_fit/test_data/*csv
 .idea
 __pycache__
