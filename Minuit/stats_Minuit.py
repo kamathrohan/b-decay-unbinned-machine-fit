@@ -1,8 +1,8 @@
 import numpy as np 
 import matplotlib.pyplot as plt 
 import csv 
-
-from test_iminuit import generate_SM, minuitfit, array_out , LaTex_labels , Standard_labels
+import pandas as pd
+from test_iminuit import generate_SM, minuitfit, array_out , LaTex_labels , Standard_labels, array_out_long
 from tqdm import tqdm 
 array=[
 0,0,0,
@@ -66,7 +66,7 @@ LaTex=LaTex_labels(amplitude_latex_names)
 Titles=Standard_labels(amplitude_names)
 
 
-iterations=3
+iterations=1
 
 
 SUM=np.zeros((iterations , 48))
@@ -76,14 +76,18 @@ for i in tqdm(range(iterations)):
     m, Coef0, Coef_OUT = minuitfit(coeffs, signal_events , array,verbose = False)
     SUM[i ,:] = Coef_OUT
     OUT=array_out(m)
+    print(OUT)
 
-print(SUM)
+
+"""
 np.savetxt("./Minuit/Test_stats/data.csv",SUM)
+"""
 with open(r"./Minuit/Test_stats/data.csv", 'a') as data:
     writer =csv.writer(data)
     for i in SUM:
         writer.writerow(i) 
     data.close()
+"""
 for j in range(48):
     fig , ax =plt.subplots()
     ave_val=np.mean(SUM[:,j])
@@ -98,3 +102,4 @@ for j in range(48):
     plt.hist(SUM[:,j] , align='mid')
     plt.savefig('./Minuit/Test_stats/'+Titles[j]+'.png')
     plt.close()
+"""
