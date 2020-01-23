@@ -6,7 +6,7 @@ from test_iminuit import generate_SM, minuitfit, array_out , LaTex_labels , Stan
 from tqdm import tqdm 
 
 
-iterations=10
+iterations=200
 
 
 array=[
@@ -35,4 +35,3 @@ for i in tqdm(range(iterations)):
         writer =csv.writer(data)
         writer.writerow(OUT) 
     data.close()
-
