@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm 
 import math
 
-
 FIX=[
 0,0,0,
 0,0,0,
@@ -29,15 +28,19 @@ FIX=[
 0,1,1,
 ]
 
+
 class toy:
+
+
     def __init__(self , fix=FIX):
+
         self.model = None
         self.coeffs = [] #Model coeffs
         self.events = [] #generated events
         self.fix_array = fix
         self.coeff_fit = [] #fitted coefficients 
 
-    def generate(self, events = 24000, model = "SM",verbose = False):
+    def generate(self, events = 2400, model = "SM",verbose = False):
         if model == "SM":
             signal_coeffs = bmf.coeffs.signal(bmf.coeffs.SM)
             self.coeffs =[i.numpy() for i in signal_coeffs] 
@@ -62,17 +65,17 @@ class toy:
     def minuitfit(self, Ncall=10000, init= 'DEFAULT' , verbose = False):
 
         if init == None or init == 'DEFAULT': 
-            A=bmf.coeffs.fit(initialization= FIT_INIT_TWICE_LARGEST_SIGNAL_SAME_SIGN )
-            #A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_default)
+            #A=bmf.coeffs.fit(initialization= FIT_INIT_TWICE_LARGEST_SIGNAL_SAME_SIGN )
+            A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_default)
         elif init == 'FIXED' :
-            A=bmf.coeffs.fit(initialization= FIT_INIT_CURRENT_SIGNAL )
+            #A=bmf.coeffs.fit(initialization= FIT_INIT_CURRENT_SIGNAL )
 
         
-            #A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_fixed)
+            A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_fixed)
         elif init == 'ANY_SIGN' : 
-            A=bmf.coeffs.fit(initialization= FIT_INIT_TWICE_CURRENT_SIGNAL_ANY_SIGN )
+            #A=bmf.coeffs.fit(initialization= FIT_INIT_TWICE_CURRENT_SIGNAL_ANY_SIGN )
 
-            #A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_any_sign)
+            A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_any_sign)
 
 
 
@@ -120,9 +123,9 @@ toy1.generate()
 t1=time.time()
 print(t1-t0)
 t0=time.time()
-toy1.minuitfit(Ncall=100)
+coef , nll = toy1.minuitfit(Ncall=100)
 t1=time.time()
 print(t1-t0)
-print(toy1.coeff_fit)
+print('Final NLL : ' , nll)
 
 
