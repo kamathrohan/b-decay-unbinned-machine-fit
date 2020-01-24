@@ -11,6 +11,8 @@ import math
 
 
 class toy:
+
+
     def __init__(self):
         self.model = None
         self.coeffs = [] #Model coeffs
