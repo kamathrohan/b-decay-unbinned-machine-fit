@@ -6,7 +6,7 @@ from test_iminuit import generate_SM, minuitfit, array_out , LaTex_labels , Stan
 from tqdm import tqdm 
 
 
-iterations=200
+iterations=1000
 
 
 array=[
@@ -29,9 +29,10 @@ array=[
 ]
 for i in tqdm(range(iterations)):
     coeffs, signal_events = generate_SM(fix_array = array)
-    m, Coef0, Coef_OUT = minuitfit(coeffs, signal_events , array,verbose = False)
+    m, Coef0, Coef_OUT , bol= minuitfit(coeffs, signal_events , array,verbose = False)
     OUT=array_out_long(m)
-    with open(r"./Minuit/Test_stats/data.csv", 'a') as data:
-        writer =csv.writer(data)
-        writer.writerow(OUT) 
-    data.close()
+    if bol==1 : 
+        with open(r"./Minuit/Test_stats/data_Pierre.csv", 'a') as data:
+            writer =csv.writer(data)
+            writer.writerow(OUT) 
+        data.close()

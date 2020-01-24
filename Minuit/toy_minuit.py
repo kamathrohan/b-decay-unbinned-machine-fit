@@ -35,12 +35,12 @@ class toy:
                     ]
         self.coeff_fit = [] #fitted coefficients 
 
-    def generate(self, events = 2400, model = "SM",verbose = False):
+    def generate(self, events = 24000, model = "SM",verbose = False):
         if model == "SM":
             signal_coeffs = bmf.coeffs.signal(bmf.coeffs.SM)
             self.coeffs =[i.numpy() for i in signal_coeffs] 
             if verbose:  
-                print("Ideal coeffs for SM:", Coef0 )
+                print("Ideal coeffs for SM:", self.coeffs )
             t0=time.time()
             self.events = bmf.signal.generate(signal_coeffs, events_total=events).numpy()
             t1=time.time()
@@ -71,7 +71,12 @@ class toy:
 
         m = Minuit.from_array_func(self.nll_iminuit,Coef_INIT, fix= self.fix_array , errordef=0.5, pedantic = False)
         t0=time.time()
-        m.migrad( ncall=Ncall)
+        m_final=m.migrad( ncall=Ncall)
+        #if m_final.is_above_max_edm==True :
+         #   print('NOOOOOOOOOOOOO')
+        print(m.migrad_ok())
+        print(type(m_final))
+        print(m_final )
         t1=time.time()
         if verbose:
             print("Time taken to fit :", t1-t0)
@@ -91,8 +96,15 @@ class toy:
 
     
 
-
+'''
 toy1 = toy()
+t0=time.time()
 toy1.generate()
-toy1.minuitfit()
+t1=time.time()
+print(t1-t0)
+t0=time.time()
+toy1.minuitfit(Ncall=100)
+t1=time.time()
+print(t1-t0)
 print(toy1.coeff_fit)
+'''

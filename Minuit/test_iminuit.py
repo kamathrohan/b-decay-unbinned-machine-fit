@@ -197,7 +197,16 @@ def minuitfit(Coef0, signal_events,fix_array, Ncall=10000,verbose = False):
         print("Initial coeffs for minuit fit:", Coef_INIT)
     m = Minuit.from_array_func(nll_iminuit,Coef_INIT, fix= fix_array , errordef=0.5, pedantic = False)
     t0=time.time()
+
+    M=m.get_fmin()
+
     m.migrad( ncall=Ncall)
+    M=m.get_fmin()
+    if M.is_above_max_edm==False  :
+        bol=0
+    else :
+        bol=1
+
     t1=time.time()
     if verbose:
         print("Time taken to fit :", t1-t0)
@@ -206,7 +215,7 @@ def minuitfit(Coef0, signal_events,fix_array, Ncall=10000,verbose = False):
     if verbose:
         print(Coef_OUT)
         print('NLL for final set of coeffs:' , nll_iminuit(Coef_OUT))
-    return m, Coef0, Coef_OUT
+    return m, Coef0, Coef_OUT , bol
 
 def array_out(m):
     n=len(m.parameters)
@@ -244,12 +253,7 @@ array=[
 0,1,1,
 ]
 
-'''
-coeffs, signal_events = generate_SM(fix_array = array)
-m, Coef0, Coef_OUT = minuitfit(coeffs, signal_events,array, Ncall=10000,verbose = True)
-OUT=array_out(m)
-print(OUT)
-'''
+
 #save_path = './Minuit/Test/'
 #plot_profiles(m , Coef0 ,Coef_OUT,fix_array , amplitude_latex_names, save_path , show = False, save = False)
  
