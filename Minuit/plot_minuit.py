@@ -42,6 +42,13 @@ def gaussian(x, mu, sig):
     #(1/(np.sqrt(2*np.pi*np.power(sig , 2.))))*
     return np.exp(-np.power(x - mu, 2.) / (2 * np.power(sig, 2.)))
 
+'''
+def get_errors(coeffs , errors ): 
+    errors = []
+    mean = np.mean(coeffs)
+
+'''
+
 def plot_stats(data , N , save_path=None , save=False):
     LaTex=LaTex_labels(amplitude_latex_names)
     Title=Standard_labels(amplitude_names)
@@ -75,7 +82,7 @@ def plot_stats(data , N , save_path=None , save=False):
         ax.set_xlim([ave_val-6*width, ave_val+6*width])
         ax.vlines(ave_val , ymin , ymax/2 , label='Average fitted value' , color='r')  
         ax.set(xlabel=LaTex[J], ylabel=r'p')
-        ax.set_title('Exp Value:'+str(format(true_val, '.4f'))+' Av Value:'+str(format( ave_val, '.4f'))+'+/-'+str(format(width, '.4f')))
+        ax.set_title('Exp Value:'+str(format(true_val, '.4f'))+' Av Value:'+str(format( ave_val, '.4f'))+'+/-'+str(format(width/np.sqrt(1000), '.4f')))
         
         #print(coefs[:,j])
         n , bins , _ =plt.hist(A  , bins = 80 , normed= True)
@@ -84,7 +91,7 @@ def plot_stats(data , N , save_path=None , save=False):
         #GAUSS=np.sort(A)
         #plt.plot(GAUSS , gaussian( GAUSS , meanLiam[0] , errsLiam[0]) , '-')
         
-        Xmin , Xmax = ave_val-width ,  ave_val+width
+        Xmin , Xmax = ave_val-width/np.sqrt(1000) ,  ave_val+width/np.sqrt(1000)
         ax.axvspan(Xmin, Xmax, alpha=0.1, color='red' , label= r'$\pm \sigma$')
         ax.legend()
         if save:

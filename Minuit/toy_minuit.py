@@ -10,29 +10,31 @@ from tqdm import tqdm
 import math
 
 
+FIX=[
+0,0,0,
+0,0,0,
+0,0,0,
+0,0,0,
+0,0,0,
+0,0,0,
+0,0,0,
+1,1,1,
+0,0,0,
+1,1,1,
+1,1,1,
+1,1,1,
+0,1,1,
+0,1,1,
+0,1,1,
+0,1,1,
+]
+
 class toy:
-    def __init__(self):
+    def __init__(self , fix=FIX):
         self.model = None
         self.coeffs = [] #Model coeffs
         self.events = [] #generated events
-        self.fix_array = [
-                    0,0,0,
-                    0,0,0,
-                    0,0,0,
-                    0,0,0,
-                    0,0,0,
-                    0,0,0,
-                    0,0,0,
-                    1,1,1,
-                    0,0,0,
-                    1,1,1,
-                    1,1,1,
-                    1,1,1,
-                    0,1,1,
-                    0,1,1,
-                    0,1,1,
-                    0,1,1,
-                    ]
+        self.fix_array = fix
         self.coeff_fit = [] #fitted coefficients 
 
     def generate(self, events = 24000, model = "SM",verbose = False):
@@ -57,13 +59,31 @@ class toy:
                 Coef_INIT[i]=  Coef0[i]
         return Coef_INIT
 
-    def minuitfit(self, Ncall=10000,verbose = False):
+    def minuitfit(self, Ncall=10000, init= 'DEFAULT' , verbose = False):
+
+        if init == None or init == 'DEFAULT': 
+            A=bmf.coeffs.fit(initialization= FIT_INIT_TWICE_LARGEST_SIGNAL_SAME_SIGN )
+            #A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_default)
+        elif init == 'FIXED' :
+            A=bmf.coeffs.fit(initialization= FIT_INIT_CURRENT_SIGNAL )
+
+        
+            #A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_fixed)
+        elif init == 'ANY_SIGN' : 
+            A=bmf.coeffs.fit(initialization= FIT_INIT_TWICE_CURRENT_SIGNAL_ANY_SIGN )
+
+            #A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_any_sign)
+
+
+
         if len(self.events) == 0:
             print("No events generated")
             return
-        A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_default)
+        
         Coef_INIT=[A[i].numpy() for i in range(len(A))]
         Coef_INIT= self.set_coef(Coef_INIT, self.coeffs, self.fix_array)
+
+        print(Coef_INIT)
 
         if verbose:
             print("Coeffs used for MC:", self.coeffs)
@@ -72,11 +92,8 @@ class toy:
         m = Minuit.from_array_func(self.nll_iminuit,Coef_INIT, fix= self.fix_array , errordef=0.5, pedantic = False)
         t0=time.time()
         m_final=m.migrad( ncall=Ncall)
-        #if m_final.is_above_max_edm==True :
-         #   print('NOOOOOOOOOOOOO')
-        print(m.migrad_ok())
-        print(type(m_final))
-        print(m_final )
+
+
         t1=time.time()
         if verbose:
             print("Time taken to fit :", t1-t0)
@@ -85,7 +102,7 @@ class toy:
         if verbose:
             print(self.coeff_fit)
             print('NLL for final set of coeffs:' , self.nll_iminuit(self.coeff_fit))
-        return
+        return self.coeff_fit , self.nll_iminuit(self.coeff_fit)
 
         
  
@@ -96,7 +113,7 @@ class toy:
 
     
 
-'''
+
 toy1 = toy()
 t0=time.time()
 toy1.generate()
@@ -107,4 +124,5 @@ toy1.minuitfit(Ncall=100)
 t1=time.time()
 print(t1-t0)
 print(toy1.coeff_fit)
-'''
+
+

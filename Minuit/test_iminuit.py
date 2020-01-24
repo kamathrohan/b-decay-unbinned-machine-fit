@@ -184,7 +184,7 @@ def plot_profiles(m , Coef0 ,coeffout,fix_array , amplitude_latex_names, save_pa
     if show:
         plt.show()
   
-def minuitfit(Coef0, signal_events,fix_array, Ncall=10000,verbose = False):
+def minuitfit(Coef0, signal_events,fix_array, Ncall=10000, verbose = False):
     A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_default)
     Coef_INIT=[A[i].numpy() for i in range(len(A))]
     Coef_INIT=set_coef(Coef_INIT, Coef0, fix_array)
@@ -202,6 +202,8 @@ def minuitfit(Coef0, signal_events,fix_array, Ncall=10000,verbose = False):
 
     m.migrad( ncall=Ncall)
     M=m.get_fmin()
+
+    print(M)
     if M.is_above_max_edm==False  :
         bol=0
     else :
@@ -255,5 +257,5 @@ array=[
 
 
 #save_path = './Minuit/Test/'
-#plot_profiles(m , Coef0 ,Coef_OUT,fix_array , amplitude_latex_names, save_path , show = False, save = False)
+#plot_profiles(m , Coef0 ,Coef_OUT,fix_array , amplitude_latex_names , show = False, save = False)
  

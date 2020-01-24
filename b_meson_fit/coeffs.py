@@ -140,7 +140,7 @@ fit_trainable_idxs = list(itertools.chain(range(0, 21), range(24, 27), [36], [39
 # Fit coefficient initialization schemes
 FIT_INIT_TWICE_LARGEST_SIGNAL_SAME_SIGN = 'TWICE_LARGEST_SIGNAL_SAME_SIGN'
 FIT_INIT_TWICE_CURRENT_SIGNAL_ANY_SIGN = 'TWICE_CURRENT_SIGNAL_ANY_SIGN'
-FIT_INIT_CURRENT_SIGNAL = 'CURRENT_SIGNAL'
+FIT_INIT_CURRENT_SIGNAL = CURRENT_SIGNAL
 fit_init_schemes = [
     FIT_INIT_TWICE_LARGEST_SIGNAL_SAME_SIGN,
     FIT_INIT_TWICE_CURRENT_SIGNAL_ANY_SIGN,
@@ -151,6 +151,9 @@ fit_init_schemes_with_randomization = [
     FIT_INIT_TWICE_CURRENT_SIGNAL_ANY_SIGN,
 ]
 fit_initialization_scheme_default = FIT_INIT_TWICE_LARGEST_SIGNAL_SAME_SIGN
+fit_initialization_fixed = FIT_INIT_CURRENT_SIGNAL
+fit_initialization_scheme_any_sign = FIT_INIT_TWICE_CURRENT_SIGNAL_ANY_SIGN
+
 
 
 def signal(model):
