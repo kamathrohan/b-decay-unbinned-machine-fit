@@ -150,9 +150,9 @@ fit_init_schemes_with_randomization = [
     FIT_INIT_TWICE_LARGEST_SIGNAL_SAME_SIGN,
     FIT_INIT_TWICE_CURRENT_SIGNAL_ANY_SIGN,
 ]
-fit_initialization_scheme_default = FIT_INIT_TWICE_LARGEST_SIGNAL_SAME_SIGN
-fit_initialization_fixed = FIT_INIT_CURRENT_SIGNAL
-fit_initialization_scheme_any_sign = FIT_INIT_TWICE_CURRENT_SIGNAL_ANY_SIGN
+fit_initialization_scheme_default = FIT_INIT_CURRENT_SIGNAL
+#fit_initialization_fixed = FIT_INIT_TWICE_LARGEST_SIGNAL_SAME_SIGN
+
 
 
 

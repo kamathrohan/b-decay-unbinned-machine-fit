@@ -64,7 +64,6 @@ def plot_stats(data , N , save_path=None , save=False):
         ave_val=np.mean(A)
         width=np.std(A)
         print('   ___________________________________________')
-        print('   ___________________________________________')
         print(Title[J])
 
         print(width)
@@ -77,6 +76,9 @@ def plot_stats(data , N , save_path=None , save=False):
                 #print(Coef0[J] , A[a])
                 clean_idx.append(a)
 
+
+        n , bins , _ =plt.hist(A  , bins = 70 , normed= True)
+
         ymin, ymax = ax.get_ylim()
         ax.vlines(true_val, ymin , ymax/2 , label='MC value')
         ax.set_xlim([ave_val-6*width, ave_val+6*width])
@@ -85,13 +87,13 @@ def plot_stats(data , N , save_path=None , save=False):
         ax.set_title('Exp Value:'+str(format(true_val, '.4f'))+' Av Value:'+str(format( ave_val, '.4f'))+'+/-'+str(format(width/np.sqrt(1000), '.4f')))
         
         #print(coefs[:,j])
-        n , bins , _ =plt.hist(A  , bins = 80 , normed= True)
+        
         
         
         #GAUSS=np.sort(A)
         #plt.plot(GAUSS , gaussian( GAUSS , meanLiam[0] , errsLiam[0]) , '-')
         
-        Xmin , Xmax = ave_val-width/np.sqrt(1000) ,  ave_val+width/np.sqrt(1000)
+        Xmin , Xmax = ave_val-width ,  ave_val+width/np.sqrt(1000)
         ax.axvspan(Xmin, Xmax, alpha=0.1, color='red' , label= r'$\pm \sigma$')
         ax.legend()
         if save:
