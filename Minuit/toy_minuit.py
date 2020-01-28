@@ -58,7 +58,8 @@ class toy:
             0,1,1,
             0,1,1,
             ]
-
+    def get_coeffs(self):
+        return self.coeffs
     def generate(self, events = 2400,verbose = False):
         
         if self.model == "SM":
@@ -157,7 +158,6 @@ class toy:
         return m , self.coeff_fit 
 
         
- 
 FIX0=[
 0,1,1,
 1,1,1,
