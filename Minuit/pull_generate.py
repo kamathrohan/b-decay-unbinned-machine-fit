@@ -2,7 +2,7 @@ from toy_minuit import *
 from test_iminuit import array_out_long
 import csv
 
-iterations = 1000
+iterations = 48
 
 for i in tqdm(range(iterations)):
     toy1 = toy(model = "SM")
