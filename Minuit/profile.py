@@ -87,7 +87,7 @@ print(B)
 n=11
 J=0
 
-for j in range(0 , 48):
+for j in tqdm(range(0 , 48)):
 
     if fix_array[j]==0:
 
@@ -102,26 +102,26 @@ for j in range(0 , 48):
         
         e = B[j]
         X[j] -= np.ceil(n/2)*e       
-        
+        """
         print('Fixed parameters : ' , fix )
         print('Initial coeffs : ' , X)
 
         print('Param ini : ' , X[j] , ' with errors : ' , B[j])
         print('Initial NLL (normalised) : ' , nll0.numpy() , '\n')
-
+        """
 
 
         for i in range(n):
             X[j] += e 
-            m , coef = toy1.minuitfit(Ncall=100 , verbose=False , coefini=X , fixed=fix)
+            m_100 , coef_100 = toy1.minuitfit(Ncall=100 , verbose=False , coefini=X , fixed=fix)
             nll=toy1.NLL
 
-            
+            """
             if i == 5 : 
                 print('Profile param (central) : ' , X[j] , '\n'  , 'Final NLL (normalised) : ' , nll.numpy() )
             else : 
                 print('Profile param :' , X[j] , '\n'  , 'Final NLL (normalised) : ' , nll.numpy())
-
+            """
             NLL_profile.append(nll.numpy())
             x.append(X[j])
 
@@ -132,7 +132,7 @@ for j in range(0 , 48):
         y=NLL_profile-min(NLL_profile)
         f = interpolate.interp1d(x, y)
         X=np.linspace(x[0] , x[-1])
-        print(X)
+        #print(X)
         plt.plot(X , f(X) , 'r-.' , label='Parabolic interp.')
         plt.plot( x , y  , 'k.' , label='Profile nll')
         plt.plot(x[int(np.floor(11/2))] , y[int(np.floor(11/2))] , 'ro'  , label='MC value')
@@ -145,9 +145,80 @@ for j in range(0 , 48):
         ax.fill_between(X, f(X), 0.5 , where=0.5 > f(X) , alpha=0.5, color='red')
         ax.legend()
         #ax.axhspan(ymin, 0.5, alpha=0.1, color='red' , label= r'$\pm \sigma$')
-        path='./Minuit/Plot_profiles/'
+        path='./Minuit/Plot_profiles/100_1000/'
 
-        plt.savefig(path+Title[j]+'.png')
+        plt.savefig(path+Title[j]+'_100.png')
+
+        bol=0
+        if bol==1 : 
+            with open(r"./Minuit/Test_stats/data_profile.csv", 'a') as data:
+                writer =csv.writer(data)
+                writer.writerow(NLL_profile)
+                writer.writerow(x) 
+            data.close()
+
+for j in tqdm(range(0 , 48)):
+
+    if fix_array[j]==0:
+
+        #print('\n' , 'Simulation #' , j+1 , '\n' , amplitude_names[j], '\n')
+        
+        fix=fix_array[:]
+        X=toy1.coeffs[:]
+        fix[j]=1
+        x=[]
+        NLL_profile=[]
+        NLL_profile = []
+        nll0=toy1.NLL0
+        
+        e = B[j]
+        X[j] -= np.ceil(n/2)*e       
+        """
+        print('Fixed parameters : ' , fix )
+        print('Initial coeffs : ' , X)
+
+        print('Param ini : ' , X[j] , ' with errors : ' , B[j])
+        print('Initial NLL (normalised) : ' , nll0.numpy() , '\n')
+
+        """
+
+        for i in range(n):
+            X[j] += e 
+            m_100 , coef_100 = toy1.minuitfit(Ncall=1000 , verbose=False , coefini=X , fixed=fix)
+            nll=toy1.NLL
+
+            """
+            if i == 5 : 
+                print('Profile param (central) : ' , X[j] , '\n'  , 'Final NLL (normalised) : ' , nll.numpy() )
+            else : 
+               print('Profile param :' , X[j] , '\n'  , 'Final NLL (normalised) : ' , nll.numpy())
+            """
+            NLL_profile.append(nll.numpy())
+            x.append(X[j])
+
+
+        
+        fig, ax = plt.subplots()
+        NLL_profile=np.array(NLL_profile)
+        y=NLL_profile-min(NLL_profile)
+        f = interpolate.interp1d(x, y)
+        X=np.linspace(x[0] , x[-1])
+        #print(X)
+        plt.plot(X , f(X) , 'r-.' , label='Parabolic interp.')
+        plt.plot( x , y  , 'k.' , label='Profile nll')
+        plt.plot(x[int(np.floor(11/2))] , y[int(np.floor(11/2))] , 'ro'  , label='MC value')
+        plt.plot(x[np.argmin(y)] , min(y) , 'ko'  , label='Migrad value')
+        
+        ax.set_title('Expected Value:'+str(Coeff0[j])+' Converged Value:'+str(x[np.argmin(y)] ))
+        ymin, ymax = ax.get_ylim()
+        #ax.vlines( toy1.coeffs[j]  , ymin , ymax , label='MC value')
+        #plt.show()
+        ax.fill_between(X, f(X), 0.5 , where=0.5 > f(X) , alpha=0.5, color='red')
+        ax.legend()
+        #ax.axhspan(ymin, 0.5, alpha=0.1, color='red' , label= r'$\pm \sigma$')
+        path='./Minuit/Plot_profiles/100_1000/'
+
+        plt.savefig(path+Title[j]+'_1000.png')
 
         bol=0
         if bol==1 : 

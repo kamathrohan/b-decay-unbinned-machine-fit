@@ -104,6 +104,19 @@ class toy:
                 Coef_INIT[i]=  Coef0[i]
         return Coef_INIT
 
+    def get_events(self):
+        if not self.events:
+            raise ValueError("Generate Events first")
+        else:
+            return self.events
+
+    def populate_events(self,events):
+        if not self.events:
+            self.events = events
+            return
+        else:
+            raise ValueError("Events already generated!")
+
 
     
     def minuitfit(self, Ncall=2400, init= 'DEFAULT' , fixed=None , coefini=None , verbose = False):
@@ -156,6 +169,8 @@ class toy:
         if verbose:
             print('\n', ' Fitted coefficients : ' , self.coeff_fit)
         return m , self.coeff_fit 
+#TODO: Return nll (will that break the rest of the code?)
+
 
         
 FIX0=[
