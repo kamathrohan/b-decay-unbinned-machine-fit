@@ -35,35 +35,23 @@ values, errors = get_arrays(data, 2000)
 
 pulls=(values-Coef0)/errors
 for j in range(48) : 
-    if FIX[j]==0:
+    if FIX[j]==0 :
+        _ , ax = plt.subplots()
         pulls0=np.sort(pulls[:,j])
-        plt.hist(pulls0[20 : 1980] , bins=60 , color='r' , alpha= 0.6 , normed=True)
+        plt.hist(pulls0[20 : 1980] , bins=60 , color='r' , alpha= 0.3 , normed=True)
+        ymin , ymax = ax.get_ylim()
+        ax.vlines( 0 , ymin , ymax , label='0' , color='k' , linestyles='dashed')
+        av0=np.mean(pulls0[20 : 1980])
+        std0=np.std(pulls0[20 : 1980])
+        ax.vlines( av0 , ymin , ymax , label='average'  , color='b' , linestyles='dashed')
+        ax.axvspan(av0-std0, av0+std0, alpha=0.1, color='b' , label= r'$\pm \sigma$')
+        ax.legend()
+        ax.set_title('Av value:'+str(format( av0, '.3f'))+'+/-'+str(format(std0, '.3f')))
+
+
         save_path = './Minuit/Plot_pulls/'
         plt.savefig(save_path+Title[j]+'.png')
     # plt.show()
 
-'''
-arr2d = []
-for j in range(2000):
-    arr = []
-    for i in range(48):
-        arr.append(pull(values[j][i],Coef0[i],errors[j][i]))
-    arr2d.append(arr)
-
-
-print(len(arr2d))
-for i in range(48):
-    if FIX[i]==0:
-        pullarray = np.asarray(arr2d)
-        array = pullarray[:,i]
-        array = np.sort(array)
-
-
-        plt.hist(array[10:1990] , bins=50 , color='r' , alpha= 0.8)
-        save_path = './Minuit/Plot_pulls/'
-        plt.savefig(save_path+Title[i]+'.png')
-
-
-'''
 
 

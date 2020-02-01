@@ -72,7 +72,7 @@ FIX1=[
 
 toy1 = toy( model='SM')
 
-toy1.generate( events = 10000 , verbose = True )
+toy1.generate( events = 2400 , verbose = True )
 A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_default , current_signal_model='SM')
 Coeff0=[A[i].numpy() for i in range(len(A))]
 m , coef = toy1.minuitfit(Ncall=1000 , verbose=False , coefini=Coeff0 , fixed=fix_array)
@@ -135,16 +135,15 @@ for j in range(0 , 48):
         print(X)
         plt.plot(X , f(X) , 'r-.' , label='Parabolic interp.')
         plt.plot( x , y  , 'k.' , label='Profile nll')
-        plt.plot(x[int(np.floor(11/2))] , y[int(np.floor(11/2))] , 'ro'  , label='MC value')
-        plt.plot(x[np.argmin(y)] , min(y) , 'ko'  , label='Migrad value')
-        
-        ax.set_title('Expected Value:'+str(Coeff0[j])+' Converged Value:'+str(x[np.argmin(y)] ))
+        plt.plot(x[int(np.floor(11/2))] , y[int(np.floor(11/2))] , 'cD'  , label='MC value')
+        plt.plot(x[np.argmin(y)] , min(y) , 'ro'  , label='Migrad value')
+        ax.set_title('Expected Value:'+str(format( Coeff0[j], '.3f'))+' Converged Value:' +str(format( x[np.argmin(y)], '.3f'))+'+/-'+str(format(B[j], '.4f')) )
         ymin, ymax = ax.get_ylim()
         #ax.vlines( toy1.coeffs[j]  , ymin , ymax , label='MC value')
         #plt.show()
         ax.fill_between(X, f(X), 0.5 , where=0.5 > f(X) , alpha=0.5, color='red')
         ax.legend()
-        #ax.axhspan(ymin, 0.5, alpha=0.1, color='red' , label= r'$\pm \sigma$')
+        ax.set(xlabel=LaTex[j], ylabel=r' $\Delta $ NLL')        #ax.axhspan(ymin, 0.5, alpha=0.1, color='red' , label= r'$\pm \sigma$')
         path='./Minuit/Plot_profiles/'
 
         plt.savefig(path+Title[j]+'.png')

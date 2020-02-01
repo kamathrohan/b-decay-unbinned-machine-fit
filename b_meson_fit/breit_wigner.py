@@ -5,27 +5,26 @@ import b_meson_fit.integrate as bmfi
 
 tf.enable_v2_behavior()
 
-# S-wave component:
+####      S-wave component:        ####
 
 # See p49 of 2018 PDG - K*0(700)
 mass_k700 = tf.constant(0.824)  # 824 MeV
 decay_width_k700 = tf.constant(0.478)  # 478 MeV
-# See p868 of 2012 PDG (Used in original paper) - K*0(800)
-# # mass_k700 = tf.constant(0.682)  # 824 MeV
-# # decay_width_k700 = tf.constant(0.547)  # 478 MeV
+
 
 # See p49 of 2018 PDG - K*0(1430)
 mass_k1430 = tf.constant(1.425)
 decay_width_k1430 = tf.constant(0.270)
 
-# P-wave component:
+
+
+
+####      P-wave component:        ####
 
 # See p49 of 2018 PDG - K*0(892)
 mass_k892 = tf.constant(0.89555)  # 895.55 MeV
 decay_width_k892 = tf.constant(0.0473)  # 47.3 MeV
-# See p870 of 2012 PDG (Used in original paper) - K*0(892)
-# # mass_k892 = tf.constant(0.89594)  # 895.55 MeV
-# # decay_width_k892 = tf.constant(0.0487)  # 47.3 MeV
+
 
 mass_k_plus = tf.constant(0.493677)  # 493.677 MeV
 mass_pi_minus = tf.constant(0.13957018)  # 139.57018 MeV
@@ -94,30 +93,42 @@ def k700_k892_distribution_integrated():
 #  so that is it not calculated on every point of a BW plot
 k700_distribution.norm = None
 k892_distribution.norm = None
+k1430_distribution.norm = None 
+
 k700_k892_distribution.norm = None
+#k700_k892_k1430_distribution.norm = None 
 
 
 def _k700_distribution_unnormalized(mass):
     return tf.math.abs(_k700_amplitude(mass)) ** 2
 
-
 def _k892_distribution_unnormalized(mass):
     return tf.math.abs(_k892_amplitude(mass)) ** 2
 
+def _k1430_distribution_unnormalized(mass):
+    return tf.math.abs(_k1430_amplitude(mass)) ** 2
 
+
+#
+#
+### HERE NEEDS CHANGE 
 def _k700_k892_distribution_unnormalized(mass):
+    return _k700_amplitude(mass) * tf.math.conj(_k892_amplitude(mass))
+#
+#
+
+def _k700_k892_k1430_distribution_unnormalized(mass): 
     return _k700_amplitude(mass) * tf.math.conj(_k892_amplitude(mass))
 
 
 def _k700_amplitude(mass):
     return _amplitude(mass, 0, mass_k700, decay_width_k700)
 
-
 def _k892_amplitude(mass):
     return _amplitude(mass, 1, mass_k892, decay_width_k892)
 
-
-
+def _k1430_amplitude(mass):
+    return _amplitude(mass , 0 , mass_k1430 , decay_width_k1430)
 
 def _integrate_distribution_around_k892(distribution):
     """Integrate distribution between +/- 100 MeV of K892 mass"""
