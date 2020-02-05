@@ -58,7 +58,8 @@ class toy:
             0,1,1,
             0,1,1,
             ]
-
+    def get_coeffs(self):
+        return self.coeffs
     def generate(self, events = 2400,verbose = False):
         
         if self.model == "SM":
@@ -102,6 +103,19 @@ class toy:
             if fix[i]==1 :
                 Coef_INIT[i]=  Coef0[i]
         return Coef_INIT
+
+    def get_events(self):
+        if not self.events:
+            raise ValueError("Generate Events first")
+        else:
+            return self.events
+
+    def populate_events(self,events):
+        if not self.events:
+            self.events = events
+            return
+        else:
+            raise ValueError("Events already generated!")
 
 
     
@@ -155,9 +169,10 @@ class toy:
         if verbose:
             print('\n', ' Fitted coefficients : ' , self.coeff_fit)
         return m , self.coeff_fit 
+#TODO: Return nll (will that break the rest of the code?)
+
 
         
- 
 FIX0=[
 0,1,1,
 1,1,1,

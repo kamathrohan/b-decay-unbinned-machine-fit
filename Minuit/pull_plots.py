@@ -1,9 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.mlab as mlab
 import pandas as pd 
 import b_meson_fit as bmf 
 from test_iminuit import amplitude_latex_names ,amplitude_names, LaTex_labels , Standard_labels
 from toy_minuit import FIX
+from scipy.stats import norm
+
 
 LaTex=LaTex_labels(amplitude_latex_names)
 Title=Standard_labels(amplitude_names)
@@ -28,17 +31,17 @@ def get_arrays(data , N):
 signal_coeffs = bmf.coeffs.signal(bmf.coeffs.SM)
 Coef0=[i.numpy() for i in signal_coeffs] 
 
-dataP = pd.read_csv("./Minuit/Test_stats/data_Pierre.csv")
-dataI = pd.read_csv("./Minuit/Test_stats/data.csv")
-data = np.vstack((dataP.values,dataI.values))
-values, errors = get_arrays(data, 2000)
+data = pd.read_csv("./Minuit/Test_stats/data_new.csv").values
+#data = np.vstack((dataP.values,dataI.values))
+values, errors = get_arrays(data, 1000)
 
 pulls=(values-Coef0)/errors
 for j in range(48) : 
     if FIX[j]==0 :
         _ , ax = plt.subplots()
         pulls0=np.sort(pulls[:,j])
-        plt.hist(pulls0[20 : 1980] , bins=60 , color='r' , alpha= 0.3 , normed=True)
+
+        #plt.hist(pulls0[20 : 1980] , bins=60 , color='r' , alpha= 0.3 , normed=True)
         ymin , ymax = ax.get_ylim()
         ax.vlines( 0 , ymin , ymax , label='0' , color='k' , linestyles='dashed')
         av0=np.mean(pulls0[20 : 1980])
@@ -48,10 +51,19 @@ for j in range(48) :
         ax.legend()
         ax.set_title('Av value:'+str(format( av0, '.3f'))+'+/-'+str(format(std0, '.3f')))
 
+        mu, sigma = norm.fit(pulls0)
 
-        save_path = './Minuit/Plot_pulls/'
+        n, bins, patches = plt.hist(pulls0, bins=60 , color='r' , alpha= 0.6 , normed=True)
+        y = mlab.normpdf(bins, mu, sigma)
+        plt.plot(bins,y, 'r--')
+
+        save_path = './Minuit/Plot_pulls/Plot_pulls_InitCurrent/'
+        plt.title(LaTex[j]+'\n Mean Pull: '+str(mu)+" Sigma: "+str(sigma))
         plt.savefig(save_path+Title[j]+'.png')
+        plt.close()
     # plt.show()
+
+
 
 
 
