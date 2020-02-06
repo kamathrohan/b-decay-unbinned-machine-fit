@@ -20,7 +20,8 @@ FIX=fix_alphas #fix_array #fix_alphas
 
 
 toy1 = toy( model='SM')
-
+coefini=bmf.coeffs.fit(initialization= 'TWICE_CURRENT_SIGNAL_ANY_SIGN',current_signal_model="SM")
+coefini = [coefini[i].numpy() for i in range(len(coefini))]
 toy1.generate( events = 10000 , verbose = False )
 A0=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_default , current_signal_model=toy1.model)
 Coeff0=[A0[i].numpy() for i in range(len(A0))]
@@ -75,55 +76,58 @@ for j in tqdm(range(0 , idx)):
             print(X[j] , ' : ' , nll100.numpy()/10000 , '&' , nll1000.numpy()/10000 , '&' , nll10000.numpy()/10000 )
 
             NLL_profile100.append(nll100.numpy())
-            NLL_profile1000.append(nll1000.numpy())
-            NLL_profile10000.append(nll10000.numpy())
+            #NLL_profile1000.append(nll1000.numpy())
+            #NLL_profile10000.append(nll10000.numpy())
 
             x.append(X[j])
 
         fig, ax = plt.subplots()
 
         NLL_profile100=np.array(NLL_profile100)
-        NLL_profile1000=np.array(NLL_profile1000)
-        NLL_profile10000=np.array(NLL_profile10000)
+        #NLL_profile1000=np.array(NLL_profile1000)
+       # NLL_profile10000=np.array(NLL_profile10000)
 
         #y100=NLL_profile100-min(NLL_profile100)
         y100=NLL_profile100/10000
         #y1000=NLL_profile1000-min(NLL_profile1000)
-        y1000=NLL_profile1000/10000
+        #y1000=NLL_profile1000/10000
         #y10000=NLL_profile10000-min(NLL_profile10000)
         y10000=NLL_profile10000/10000
 
         f100 = interpolate.interp1d(x, y100)
-        f1000 = interpolate.interp1d(x, y1000)
-        f10000 = interpolate.interp1d(x, y10000)
+        #f1000 = interpolate.interp1d(x, y1000)
+        #f10000 = interpolate.interp1d(x, y10000)
 
         X=np.linspace(x[0] , x[-1])
         plt.plot(X , f100(X) , 'r-.' , label='Migrad100')
-        plt.plot(X , f1000(X) , 'b-.' , label='Migrad1000')
-        plt.plot(X , f10000(X) , 'g-.', label='Migrad10000')
+        #plt.plot(X , f1000(X) , 'b-.' , label='Migrad1000')
+        #plt.plot(X , f10000(X) , 'g-.', label='Migrad10000')
 
 
         plt.plot( x , y100  , 'k.' )
-        plt.plot( x , y1000  , 'k.' )
-        plt.plot( x , y10000  , 'k.' )
+        #plt.plot( x , y1000  , 'k.' )
+        #plt.plot( x , y10000  , 'k.' )
 
 
         plt.plot(x[int(np.floor(11/2))] , y100[int(np.floor(11/2))] , 'cD'  , label='MC value')
-        plt.plot(x[int(np.floor(11/2))] , y1000[int(np.floor(11/2))] , 'cD' )
-        plt.plot(x[int(np.floor(11/2))] , y10000[int(np.floor(11/2))] , 'cD' )
+        #plt.plot(x[int(np.floor(11/2))] , y1000[int(np.floor(11/2))] , 'cD' )
+        #plt.plot(x[int(np.floor(11/2))] , y10000[int(np.floor(11/2))] , 'cD' )
 
         plt.plot(x[np.argmin(y100)] , min(y100) , 'ro' )
-        plt.plot(x[np.argmin(y1000)] , min(y1000) , 'bo' )
-        plt.plot(x[np.argmin(y10000)] , min(y10000) , 'go'  )
+        #plt.plot(x[np.argmin(y1000)] , min(y1000) , 'bo' )
+        #plt.plot(x[np.argmin(y10000)] , min(y10000) , 'go'  )
 
 
-        title = ax.set_title('Expected Value:'+str(format( Coeff0[j], '.3f'))+'      Migrad100:' +str(format( x[np.argmin(y100)], '.3f'))+ '\n' + 'Migrad1000:' +str(format( x[np.argmin(y1000)], '.3f'))+ '      Migrad10000:' +str(format( x[np.argmin(y10000)], '.3f')) )
+        title = ax.set_title('Expected Value:'+str(format( Coeff0[j], '.3f'))+'      Migrad100:' +str(format( x[np.argmin(y100)], '.3f'))
+        #                                                                        + '\n' + 'Migrad1000:' +str(format( x[np.argmin(y1000)], '.3f'))
+        #                                                                        + '      Migrad10000:' +str(format( x[np.argmin(y10000)], '.3f')) 
+                                                                                )
         #+r'$\pm$'+str(format(B[j], '.4f')) +
         ymin, ymax = ax.get_ylim()
         #ax.vlines( toy1.coeffs[j]  , ymin , ymax , label='MC value')
         #plt.show()
         
-        #ax.fill_between(X, f100(X), 0.5 , where=0.5 > f100(X) , alpha=0.5, color='red')
+        #ax.fill_between(X, f100(X), 0.5 , where=0.5 > f100(X) , alpha=0.5, color='red') 
         #ax.fill_between(X, f1000(X), 0.5 , where=0.5 > f1000(X) , alpha=0.5, color='blue')
 
         ax.legend()

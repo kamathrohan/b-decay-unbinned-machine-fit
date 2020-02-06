@@ -165,7 +165,6 @@ class toy:
         if verbose:
             print('\n', ' Fitted coefficients : ' , self.coeff_fit)
         return m , self.coeff_fit 
-#TODO: Return nll (will that break the rest of the code?)
 
 
         
