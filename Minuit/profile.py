@@ -5,20 +5,26 @@ from toy_minuit import toy
 import time 
 from tqdm import tqdm
 import csv 
-from test_iminuit import amplitude_latex_names ,amplitude_names, LaTex_labels , Standard_labels  , fix_array
+from test_iminuit import amplitude_latex_names ,amplitude_names, LaTex_labels , Standard_labels  , fix_array , fix_alphas
 from scipy import interpolate 
 from textwrap import wrap
 
 
+
 LaTex=LaTex_labels(amplitude_latex_names)
 Title=Standard_labels(amplitude_names)
+init_scheme=bmf.coeffs.fit_initialization_same #fit_initialization_scheme_default #fit_initialization_any
+FIX=fix_alphas #fix_array #fix_alphas
+
+
+
 
 toy1 = toy( model='SM')
 
 toy1.generate( events = 10000 , verbose = False )
-A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_default , current_signal_model=toy1.model)
-Coeff0=[A[i].numpy() for i in range(len(A))]
-m , coef = toy1.minuitfit(Ncall=100 , verbose=False , coefini=Coeff0 , fixed=fix_array)
+A0=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_default , current_signal_model=toy1.model)
+Coeff0=[A0[i].numpy() for i in range(len(A0))]
+m , coef = toy1.minuitfit(Ncall=100 , verbose=False , coefini=Coeff0 , fixed=FIX)
 
 
 B=[m.errors[i] for i in m.errors]
@@ -31,11 +37,18 @@ n=11
 J=0
 idx=48
 
+
+
+A=bmf.coeffs.fit(init_scheme , current_signal_model=toy1.model)
+
+
 for j in tqdm(range(0 , idx)):
 
-    if fix_array[j]==0:
+
+    if FIX[j]==0:
+        print(j)
         
-        fix=fix_array[:]
+        fix=FIX[:]
         fix[j]=1
         x=[]
         NLL_profile100=[]       
@@ -45,45 +58,19 @@ for j in tqdm(range(0 , idx)):
         
         e = B[j]
 
-        A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_fixed0 , current_signal_model=toy1.model)
-        X=[A[i].numpy() for i in range(len(A))]
+        X=toy1.set_coef([A[i].numpy() for i in range(len(A))] , Coeff0 , fix) 
+        print(X)
         X[j]=Coeff0[j]
         X[j] -= np.ceil(n/2)*e
 
         for i in range(n):
             X[j] += e 
-<<<<<<< HEAD
-            m_100 , coef_100 = toy1.minuitfit(Ncall=100 , init= 'SAME SIGN' ,verbose=False , coefini=X , fixed=fix)
+            m_100 , coef_100 = toy1.minuitfit(Ncall=100 ,verbose=False , coefini=X , fixed=fix)
             nll100=toy1.NLL
-            m_1000 , coef_1000 = toy1.minuitfit(Ncall=1000 , init= 'SAME SIGN' ,verbose=False , coefini=X , fixed=fix)
+            m_1000 , coef_1000 = toy1.minuitfit(Ncall=1000 , verbose=False , coefini=X , fixed=fix)
             nll1000=toy1.NLL
-            m_10000 , coef_10000 = toy1.minuitfit(Ncall=10000 ,init= 'SAME SIGN' , verbose=False , coefini=X , fixed=fix)
+            m_10000 , coef_10000 = toy1.minuitfit(Ncall=10000 , verbose=False , coefini=X , fixed=fix)
             nll10000=toy1.NLL
-=======
-            m_100 , coef_100 = toy1.minuitfit(Ncall=100 , verbose=False , coefini=X , fixed=fix)
-            nll=toy1.NLL
-
-            """
-            if i == 5 : 
-                print('Profile param (central) : ' , X[j] , '\n'  , 'Final NLL (normalised) : ' , nll.numpy() )
-            else : 
-                print('Profile param :' , X[j] , '\n'  , 'Final NLL (normalised) : ' , nll.numpy())
-            """
-            NLL_profile.append(nll.numpy())
-            x.append(X[j])
-            m_100 , coef_100 = toy1.minuitfit(Ncall=1000 , verbose=False , coefini=X , fixed=fix)
-            nll=toy1.NLL
-            NLL_profile.append(nll.numpy())
-            x.append(X[j])
-
-
-
-
-
-            
-            
-
->>>>>>> 92eef148297a323e99ef3008cafa9ef726369984
 
             print(X[j] , ' : ' , nll100.numpy()/10000 , '&' , nll1000.numpy()/10000 , '&' , nll10000.numpy()/10000 )
 
@@ -94,7 +81,6 @@ for j in tqdm(range(0 , idx)):
             x.append(X[j])
 
         fig, ax = plt.subplots()
-<<<<<<< HEAD
 
         NLL_profile100=np.array(NLL_profile100)
         NLL_profile1000=np.array(NLL_profile1000)
@@ -106,38 +92,6 @@ for j in tqdm(range(0 , idx)):
         y1000=NLL_profile1000/10000
         #y10000=NLL_profile10000-min(NLL_profile10000)
         y10000=NLL_profile10000/10000
-=======
-        NLL_profile=np.array(NLL_profile)
-        y=NLL_profile-min(NLL_profile)
-        #f = interpolate.interp1d(x, y)
-        X=np.linspace(x[0] , x[-1])
-        #print(X)
-        #plt.plot(X , f(X) , 'r-.' , label='Parabolic interp.')
-        plt.plot( x , y  , 'k.' , label='Profile nll')
-        #plt.plot(x[int(np.floor(11/2))] , y[int(np.floor(11/2))] , 'ro'  , label='MC value')
-        plt.plot(x[np.argmin(y)] , min(y) , 'ko'  , label='Migrad value')
-        
-        ax.set_title('Expected Value:'+str(Coeff0[j])+' Converged Value:'+str(x[np.argmin(y)] ))
-        ymin, ymax = ax.get_ylim()
-        #ax.vlines( toy1.coeffs[j]  , ymin , ymax , label='MC value')
-        #plt.show()
-        #ax.fill_between(X, f(X), 0.5 , where=0.5 > f(X) , alpha=0.5, color='red')
-        ax.legend()
-        #ax.axhspan(ymin, 0.5, alpha=0.1, color='red' , label= r'$\pm \sigma$')
-        path='./Minuit/Plot_profiles/100_1000/'
-
-        plt.savefig(path+Title[j]+'_100+1000.png')
-
-        bol=0
-        if bol==1 : 
-            with open(r"./Minuit/Test_stats/data_profile.csv", 'a') as data:
-                writer =csv.writer(data)
-                writer.writerow(NLL_profile)
-                writer.writerow(x) 
-            data.close()
-np.savetxt("three.csv",toy1.events)
-
->>>>>>> 92eef148297a323e99ef3008cafa9ef726369984
 
         f100 = interpolate.interp1d(x, y100)
         f1000 = interpolate.interp1d(x, y1000)
@@ -173,21 +127,6 @@ np.savetxt("three.csv",toy1.events)
         #ax.fill_between(X, f1000(X), 0.5 , where=0.5 > f1000(X) , alpha=0.5, color='blue')
 
         ax.legend()
-<<<<<<< HEAD
         ax.set(xlabel=LaTex[j], ylabel=r' NLL')        #ax.axhspan(ymin, 0.5, alpha=0.1, color='red' , label= r'$\pm \sigma$')        
         plt.subplots_adjust(top=0.9)
         plt.savefig(path+Title[j]+'.png')
-=======
-        #ax.axhspan(ymin, 0.5, alpha=0.1, color='red' , label= r'$\pm \sigma$')
-        path='./Minuit/Plot_profiles/100_1000/'
-
-        #plt.savefig(path+Title[j]+'_1000.png')
-
-        bol=0
-        if bol==1 : 
-            with open(r"./Minuit/Test_stats/data_profile.csv", 'a') as data:
-                writer =csv.writer(data)
-                writer.writerow(NLL_profile)
-                writer.writerow(x) 
-            data.close()
->>>>>>> 92eef148297a323e99ef3008cafa9ef726369984

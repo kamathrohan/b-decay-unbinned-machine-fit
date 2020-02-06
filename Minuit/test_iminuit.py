@@ -27,8 +27,27 @@ fix_array=[
 0,1,1,
 0,1,1,
 0,1,1,
-0,1,1,
+0,1,1
 ]
+
+fix_alphas=[
+0,1,1,
+0,1,1,
+0,1,1,
+0,1,1,
+0,1,1,
+1,1,1,
+1,1,1,
+1,1,1,
+0,1,1,
+1,1,1,
+1,1,1,
+1,1,1,
+1,1,1,
+0,1,1,
+0,1,1,
+0,1,1]
+
 
 #Define amplitude names (total number of variables is  16*3 for alpha , beta and gamma )
 amplitude_latex_names = [
@@ -234,28 +253,3 @@ def array_out_long(m):
         OUT.append(m.values[i])
         OUT.append(m.errors[i])
     return OUT
-
-
-array=[
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-1,1,1,
-0,0,0,
-1,1,1,
-1,1,1,
-1,1,1,
-0,1,1,
-0,1,1,
-0,1,1,
-0,1,1,
-]
-
-
-#save_path = './Minuit/Test/'
-#plot_profiles(m , Coef0 ,Coef_OUT,fix_array , amplitude_latex_names , show = False, save = False)
- 

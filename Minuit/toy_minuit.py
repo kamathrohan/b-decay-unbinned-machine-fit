@@ -60,7 +60,9 @@ class toy:
             ]
     def get_coeffs(self):
         return self.coeffs
-    def generate(self, events = 2400,verbose = False):
+
+
+    def generate(self, events = 2400,verbose = False ):
         
         if self.model == "SM":
             signal_coeffs = bmf.coeffs.signal(bmf.coeffs.SM)
@@ -123,26 +125,20 @@ class toy:
 
         #if init == None or init == 'DEFAULT': 
             #A=bmf.coeffs.fit(initialization= FIT_INIT_TWICE_LARGEST_SIGNAL_SAME_SIGN )
-        A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_default , current_signal_model=self.model)
+        if init ==None or init == 'DEFAULT' : 
+            A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_default , current_signal_model=self.model)
+
+        elif init == 'SAME SIGN' : 
+            A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_fixed0 , current_signal_model=self.model)
+
+        elif init == 'ANY SIGN' :
+            A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_fixed1 , current_signal_model=self.model)
+
         if fixed is None : fixed = self.FIX
-        '''
-        elif init == 'FIXED' :
-            #A=bmf.coeffs.fit(initialization= FIT_INIT_CURRENT_SIGNAL )
-
-        
-            A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_fixed)
-        elif init == 'ANY_SIGN' : 
-            #A=bmf.coeffs.fit(initialization= FIT_INIT_TWICE_CURRENT_SIGNAL_ANY_SIGN )
-
-            A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_any_sign)
-
-        '''
 
         if len(self.events) == 0:
             print("No events generated")
             return
-        
-
         
 
         if coefini is not None :
