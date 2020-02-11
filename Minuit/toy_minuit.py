@@ -121,7 +121,7 @@ class toy:
 
 
     
-    def minuitfit(self, Ncall=2400, init= 'DEFAULT' , fixed=None , coefini=None , verbose = False):
+    def minuitfit(self, Ncall=10000, init= 'DEFAULT' , fixed=None , coefini=None , verbose = False):
 
         #if init == None or init == 'DEFAULT': 
             #A=bmf.coeffs.fit(initialization= FIT_INIT_TWICE_LARGEST_SIGNAL_SAME_SIGN )
@@ -129,10 +129,10 @@ class toy:
             A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_default , current_signal_model=self.model)
 
         elif init == 'SAME SIGN' : 
-            A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_fixed0 , current_signal_model=self.model)
+            A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_same , current_signal_model=self.model)
 
         elif init == 'ANY SIGN' :
-            A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_fixed1 , current_signal_model=self.model)
+            A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_any , current_signal_model=self.model)
 
         if fixed is None : fixed = self.FIX
 
@@ -165,7 +165,6 @@ class toy:
         if verbose:
             print('\n', ' Fitted coefficients : ' , self.coeff_fit)
         return m , self.coeff_fit 
-#TODO: Return nll (will that break the rest of the code?)
 
 
         
@@ -206,6 +205,7 @@ FIX1=[
 0,0,0,
 0,0,0,
 ]
+
 
 
 
