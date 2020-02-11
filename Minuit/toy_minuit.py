@@ -35,6 +35,7 @@ class toy:
     def __init__(self , model='SM'):
 
         self.model = model
+        self.events_bool = False
         self.coeffs = [] #Model coeffs
         self.events = [] #generated events
         self.coeff_fit = [] #fitted coefficients 
@@ -73,6 +74,7 @@ class toy:
             self.events = bmf.signal.generate(signal_coeffs, events_total=events).numpy()
             t1=time.time()
             self.NLL0=self.nll_iminuit(self.coeffs)
+            self.events_bool = True
             if verbose:
                 print("Time taken to generate data:", t1-t0)
 
@@ -85,6 +87,7 @@ class toy:
             self.events = bmf.signal.generate(signal_coeffs, events_total=events).numpy()
             t1=time.time()
             self.NLL0=self.nll_iminuit(self.coeffs)
+            self.events_bool = True
             if verbose:
                 print("Time taken to generate data:", t1-t0)
           
@@ -107,7 +110,7 @@ class toy:
         return Coef_INIT
 
     def get_events(self):
-        if not self.events:
+        if not self.events_bool:
             raise ValueError("Generate Events first")
         else:
             return self.events
@@ -207,46 +210,3 @@ FIX1=[
 ]
 
 
-
-
-'''
-x=[]
-NLL_profile=[]
-A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_default , current_signal_model='SM')
-X=[A[i].numpy() for i in range(len(A))]
-e= 10**(1)
-X[0] -= 5*e
-
-toy1 = toy( model='SM')
-
-toy1.generate( verbose = False )
-
-for j in tqdm(range(10)):
-    X[0] += e 
-    
-
-    coef = toy1.minuitfit(Ncall=10000 , verbose=True , coefini=X , fixed=FIX1)
-    nll0=toy1.NLL0
-    nll=toy1.NLL
-
-    print('Initial NLL : ' , nll0.numpy())
-
-
-    print('Final NLL : ' , nll.numpy())
-
-    NLL_profile.append(nll.numpy())
-    x.append(X[0])
-
-
-print(NLL_profile)
-print(x)
-
-fig, ax = plt.subplots()
-plt.plot( x , NLL_profile )
-ymin, ymax = ax.get_ylim()
-#ax.vlines(  , ymin , ymax , label='MC value')
-plt.show()
-
-
-
-'''

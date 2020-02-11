@@ -67,6 +67,7 @@ fix_one_alpha=[
 1,1,1]
 
 
+
 #Define amplitude names (total number of variables is  16*3 for alpha , beta and gamma )
 amplitude_latex_names = [
     r'Re($A_{\parallel}^L$)',
@@ -106,6 +107,12 @@ amplitude_names = [
     'a_00_r_im',
 ]
 
+
+#define initialisations 
+
+coeff_default =  [i.numpy() for i in bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_default , current_signal_model="SM")]
+coeff_same_sign = [i.numpy() for i in bmf.coeffs.fit(bmf.coeffs.fit_initialization_same , current_signal_model="SM")]
+coeff_any_sign = [i.numpy() for i in bmf.coeffs.fit(bmf.coeffs.fit_initialization_same , current_signal_model="SM")]
 
 
 def LaTex_labels(amplitude_latex_names):

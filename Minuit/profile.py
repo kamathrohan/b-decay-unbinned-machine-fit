@@ -29,7 +29,6 @@ m , coef = toy1.minuitfit(Ncall=100 , verbose=False , coefini=Coeff0 , fixed=FIX
 B=[m.errors[i] for i in m.errors]
 B=np.array(B)
 
-np.savetxt("two.csv",toy1.events)
 
 path='./Minuit/Plot_profiles/TryIt/'
 n=11
