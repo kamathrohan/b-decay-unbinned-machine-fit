@@ -38,10 +38,10 @@ def pulls(m,fix, coeff_default):
     return pulls 
 
     
-np.savetxt("toy_10M.csv",toy1.get_events())
+#np.savetxt("toy_10M.csv",toy1.get_events())
 t1 = time.ctime()
 print("Time generate: ",t1)
-m , coef = toy1.minuitfit(Ncall=100000 , verbose=False , coefini=initial(coeff_same_sign,fix_alpha_beta) , fixed=fix_alpha_beta)
+m , coef = toy1.minuitfit(Ncall=1000000 , verbose=False , coefini=initial(coeff_same_sign,fix_alpha_beta) , fixed=fix_alpha_beta)
 t2 = time.ctime()
 print("Time Finish: ",t2)
 print(pulls(m,fix_alpha_beta, coeff_default))
