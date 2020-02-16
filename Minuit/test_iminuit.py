@@ -67,6 +67,24 @@ fix_one_alpha=[
 1,1,1]
 
 
+fix_alpha_beta=[
+0,0,1,
+0,0,1,
+0,0,1,
+0,0,1,
+0,0,1,
+0,0,1,
+0,0,1,
+1,1,1,
+0,0,1,
+1,1,1,
+1,1,1,
+1,1,1,
+0,1,1,
+0,1,1,
+0,1,1,
+0,1,1]
+
 
 #Define amplitude names (total number of variables is  16*3 for alpha , beta and gamma )
 amplitude_latex_names = [
@@ -196,7 +214,7 @@ def plot_profiles(m , Coef0 ,coeffout,fix_array , amplitude_latex_names, save_pa
         ax.set(xlabel=LaTex[i0], ylabel=r'NLL')
         Xmin , Xmax = m.values[i0]-m.errors[i0] ,  m.values[i0]+m.errors[i0] 
         ax.axvspan(Xmin, Xmax, alpha=0.1, color='red' , label= r'$\pm \sigma$')
-        ax.set_title('Fit for '+LaTex[i0]+'with N='+str(Ncall)+'\n Expected Value:'+str(Coef0[i0])+' Actual Value:'+str(coeffout[i0]))
+        ax.set_title('Fit for '+LaTex[i0]+'\n Expected Value:'+str(Coef0[i0])+' Actual Value:'+str(coeffout[i0]))
         ax.legend()
         titre = Title[i0]
 
