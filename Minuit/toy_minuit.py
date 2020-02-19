@@ -3,35 +3,17 @@ import tensorflow as tf
 import b_meson_fit.coeffs as bmfc
 import b_meson_fit.signal as bmfs
 import b_meson_fit as bmf 
+from test_iminuit import amplitude_latex_names ,amplitude_names, LaTex_labels , Standard_labels  , fix_array , fix_alphas , fix_one_alpha , fix_alpha_beta , fix_alpha_beta_gamma1 
 import time 
 from iminuit import Minuit 
 import matplotlib.pyplot as plt 
 from tqdm import tqdm 
 import math
 
-FIX=[
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-1,1,1,
-0,0,0,
-1,1,1,
-1,1,1,
-1,1,1,
-0,1,1,
-0,1,1,
-0,1,1,
-0,1,1,
-]
+
 
 
 class toy:
-
-
     def __init__(self , model='SM'):
 
         self.model = model
@@ -41,24 +23,8 @@ class toy:
         self.coeff_fit = [] #fitted coefficients 
         self.NLL0=0
         self.NLL=0
-        self.FIX=[
-            0,0,0,
-            0,0,0,
-            0,0,0,
-            0,0,0,
-            0,0,0,
-            0,0,0,
-            0,0,0,
-            1,1,1,
-            0,0,0,
-            1,1,1,
-            1,1,1,
-            1,1,1,
-            0,1,1,
-            0,1,1,
-            0,1,1,
-            0,1,1,
-            ]
+        self.FIX=fix_array
+        
     def get_coeffs(self):
         return self.coeffs
 
@@ -122,6 +88,42 @@ class toy:
         else:
             raise ValueError("Events already generated!")
 
+    def tf_fit(self, Ncall=None, init= 'DEFAULT' , fixed=None , coefini=None , verbose = False):
+        
+        if init ==None or init == 'DEFAULT' : 
+            A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_default , current_signal_model= self.model , fix=fixed)
+
+        elif init == 'SAME SIGN' : 
+            A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_same , current_signal_model=self.model , fix=fixed)
+            
+        elif init == 'ANY SIGN' :
+            A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_any , current_signal_model=self.model , fix=fixed)
+        
+        events=tf.convert_to_tensor(self.events)
+        optimizer = bmf.Optimizer(
+            A,
+            events,
+            opt_name='AMSGrad',
+            learning_rate=0.20,
+            opt_params=None,
+            grad_clip=None,
+            grad_max_cutoff=5e-6
+        )      
+        converged = False
+        j=0
+        while converged == False :
+            optimizer.minimize()
+            if Ncall is not None :
+                if j>Ncall :
+                    tfCoeff=[optimizer.fit_coeffs[i].numpy() for i in range(len(optimizer.fit_coeffs))]
+                    return optimizer , tfCoeff
+
+            j+=1
+            if optimizer.converged() == True :
+                converged= True 
+
+        tfCoeff=[optimizer.fit_coeffs[i].numpy() for i in range(len(optimizer.fit_coeffs))]
+        return optimizer , tfCoeff 
 
     
     def minuitfit(self, Ncall=10000, init= 'DEFAULT' , fixed=None , coefini=None , verbose = False):
@@ -170,41 +172,3 @@ class toy:
         return m , self.coeff_fit 
 
 
-        
-FIX0=[
-0,1,1,
-1,1,1,
-1,1,1,
-1,1,1,
-1,1,1,
-1,1,1,
-1,1,1,
-1,1,1,
-1,1,1,
-1,1,1,
-1,1,1,
-1,1,1,
-1,1,1,
-1,1,1,
-1,1,1,
-1,1,1
-]
-
-FIX1=[
-1,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-0,0,0,
-]

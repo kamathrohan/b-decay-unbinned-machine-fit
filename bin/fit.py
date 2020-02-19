@@ -172,8 +172,7 @@ with bmf.Script(device=args.device) as script:
             args.iterations + 1,
             initial=iteration,
             total=args.iterations,
-            unit='fit'
-    ):
+            unit='fit'):
         # Time each iteration for CSV writing
         script.timer_start('fit')
 

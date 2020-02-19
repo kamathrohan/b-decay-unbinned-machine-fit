@@ -5,17 +5,17 @@ from toy_minuit import toy
 import time 
 from tqdm import tqdm
 import csv 
-from test_iminuit import amplitude_latex_names ,amplitude_names, LaTex_labels , Standard_labels  , fix_array , fix_alphas , fix_one_alpha , fix_alpha_beta
+from test_iminuit import amplitude_latex_names ,amplitude_names, LaTex_labels , Standard_labels  , fix_array , fix_alphas , fix_one_alpha , fix_alpha_beta  ,fix_alpha_beta_gamma5
 from scipy import interpolate 
 from textwrap import wrap
 
 
 LaTex=LaTex_labels(amplitude_latex_names)
 Title=Standard_labels(amplitude_names)
-init_scheme    = bmf.coeffs.fit_initialization_same #fit_initialization_scheme_default #fit_initialization_any
-init_scheme_1  = bmf.coeffs.fit_initialization_scheme_default
-FIX=fix_alpha_beta #fix_array #fix_alphas #fix_one_alpha #fix_alpha_beta
-N=10000
+init_scheme   = bmf.coeffs.fit_initialization_same #fit_initialization_scheme_default #fit_initialization_any
+init_scheme_1 = bmf.coeffs.fit_initialization_scheme_default
+FIX=fix_alpha_beta_gamma5 #fix_array #fix_alphas #fix_one_alpha #fix_alpha_beta #fix_alpha_beta_gamma1
+N=2400
 
 toy1 = toy( model='SM')
 
@@ -23,8 +23,8 @@ toy1.generate( events = N , verbose = False )
 A0=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_default , current_signal_model=toy1.model)
 Coeff0=[A0[i].numpy() for i in range(len(A0))]
 m , coef = toy1.minuitfit(Ncall=10000 , verbose=False , coefini=Coeff0 , fixed=FIX)
-
-
+print(coef)
+print(m.get_fmin())
 B=[m.errors[i] for i in m.errors]
 B=np.array(B)
 
@@ -33,12 +33,25 @@ path='./Minuit/Plot_profiles/TryIt/'
 n=11
 J=0
 idx=48
-Nmigrad=[100 , 200 , 500 , 1000 , 10000]
+Nmigrad=[500 ,1000 , 2000 , 5000 ,10000 ]
 NLL=np.zeros((len(Nmigrad) , n))
 
 
 A=bmf.coeffs.fit(init_scheme , current_signal_model=toy1.model)
 A_bis=bmf.coeffs.fit(init_scheme_1 , current_signal_model=toy1.model)
+
+
+def find_error(profile):
+    array = np.asarray(profile)
+
+    fmin=min(profile)
+    print(fmin)
+
+    idx = (np.abs(array - fmin - (0.5/N))).argmin()
+
+    return array[idx] , 
+
+
 
 
 for j in tqdm(range(0 , idx)):
@@ -49,8 +62,8 @@ for j in tqdm(range(0 , idx)):
         fix=FIX[:]
         fix[j]=1
         x=[]
-        
-        
+        sig=0.5/N
+        print(sig)    
         NLL_profile1=[] 
         NLL_profile2=[] 
         NLL_profile3=[] 
@@ -68,7 +81,7 @@ for j in tqdm(range(0 , idx)):
         NLL_profile100=[]
         nll0=toy1.NLL0
         
-        e = B[j]
+        e = 2*B[j]
 
         X=toy1.set_coef([A[i].numpy() for i in range(len(A))] , Coeff0 , fix) 
         X_bis=toy1.set_coef([A_bis[i].numpy() for i in range(len(A_bis))] , Coeff0 , fix) 
@@ -83,58 +96,51 @@ for j in tqdm(range(0 , idx)):
             X[j] += e 
             X_bis[j] += e
 
-            m_1 , coef_1 = toy1.minuitfit(Ncall=100 ,verbose=False , coefini=X , fixed=fix)
+
+            ## INIT random 
+            m_1 , coef_1 = toy1.minuitfit(Ncall=Nmigrad[0] ,verbose=False , coefini=X , fixed=fix)
             nll1=toy1.NLL
             NLL_profile1.append(nll1.numpy())
             
-            m_2 , coef_2 = toy1.minuitfit(Ncall=200 ,verbose=False , coefini=X , fixed=fix)
+            m_2 , coef_2 = toy1.minuitfit(Ncall=Nmigrad[1] ,verbose=False , coefini=X , fixed=fix)
             nll2=toy1.NLL
             NLL_profile2.append(nll2.numpy())
 
-            m_3 , coef_3 = toy1.minuitfit(Ncall=500 ,verbose=False , coefini=X , fixed=fix)
+            m_3 , coef_3 = toy1.minuitfit(Ncall=Nmigrad[2],verbose=False , coefini=X , fixed=fix)
             nll3=toy1.NLL           
             NLL_profile3.append(nll3.numpy())
 
-            m_4 , coef_4 = toy1.minuitfit(Ncall=1000 ,verbose=False , coefini=X , fixed=fix)
+            m_4 , coef_4 = toy1.minuitfit(Ncall=Nmigrad[3] ,verbose=False , coefini=X , fixed=fix)
             nll4=toy1.NLL
             NLL_profile4.append(nll4.numpy())
 
-            m_5 , coef_5 = toy1.minuitfit(Ncall=10000 ,verbose=False , coefini=X , fixed=fix)
+            m_5 , coef_5 = toy1.minuitfit(Ncall=Nmigrad[4] ,verbose=False , coefini=X , fixed=fix)
             nll5=toy1.NLL
             NLL_profile5.append(nll5.numpy())
 
-
-            m_1_bis , coef_1_bis = toy1.minuitfit(Ncall=100 , verbose=False , coefini=X_bis , fixed=fix)
+            ## INIT on parameter
+            m_1_bis , coef_1_bis = toy1.minuitfit(Ncall=Nmigrad[0] , verbose=False , coefini=X_bis , fixed=fix)
             nll1_bis=toy1.NLL
             NLL_profile1_bis.append(nll1_bis.numpy())
 
-            m_2_bis , coef_3_bis = toy1.minuitfit(Ncall=200 , verbose=False , coefini=X_bis , fixed=fix)
+            m_2_bis , coef_3_bis = toy1.minuitfit(Ncall=Nmigrad[1] , verbose=False , coefini=X_bis , fixed=fix)
             nll2_bis=toy1.NLL
             NLL_profile2_bis.append(nll2_bis.numpy())
 
-            m_3_bis , coef_3_bis = toy1.minuitfit(Ncall=500 , verbose=False , coefini=X_bis , fixed=fix)
+            m_3_bis , coef_3_bis = toy1.minuitfit(Ncall=Nmigrad[2] , verbose=False , coefini=X_bis , fixed=fix)
             nll3_bis=toy1.NLL
             NLL_profile3_bis.append(nll3_bis.numpy())
 
-            m_4_bis , coef_4_bis = toy1.minuitfit(Ncall=1000 , verbose=False , coefini=X_bis , fixed=fix)
+            m_4_bis , coef_4_bis = toy1.minuitfit(Ncall=Nmigrad[3] , verbose=False , coefini=X_bis , fixed=fix)
             nll4_bis=toy1.NLL
             NLL_profile4_bis.append(nll4_bis.numpy())
 
-            m_5_bis , coef_5_bis = toy1.minuitfit(Ncall=10000 , verbose=False , coefini=X_bis , fixed=fix)
+            m_5_bis , coef_5_bis = toy1.minuitfit(Ncall=Nmigrad[4] , verbose=False , coefini=X_bis , fixed=fix)
             nll5_bis=toy1.NLL
             NLL_profile5_bis.append(nll5_bis.numpy())
 
 
-            '''
-            m_10 , coef_1000 = toy1.minuitfit(Ncall=1000 , verbose=False , coefini=X , fixed=fix)
-            nll10=toy1.NLL
-
-            
-            m_1 , coef_10000 = toy1.minuitfit(Ncall=10000 , verbose=False , coefini=X , fixed=fix)
-            nll100=toy1.NLL
-            '''
-
-            print(X[j] , ' : ' , nll1.numpy()/N ,  '&' , nll2.numpy()/N ,  '&' , nll3.numpy()/N ,  '&' , nll4.numpy()/N ,  '&' , nll5.numpy()/N , '&' ,'\n',  nll1_bis.numpy()/N, '&' , nll2_bis.numpy()/N, '&' , nll3_bis.numpy()/N, '&' , nll4_bis.numpy()/N, '&' , nll5_bis.numpy()/N , '\n')
+            print( '------' , X[j] ,'------', ' : ' ,'\n', nll1.numpy()/N ,  '&' , nll2.numpy()/N ,  '&' , nll3.numpy()/N ,  '&' , nll4.numpy()/N ,  '&' , nll5.numpy()/N , '&' ,'\n',  nll1_bis.numpy()/N, '&' , nll2_bis.numpy()/N, '&' , nll3_bis.numpy()/N, '&' , nll4_bis.numpy()/N, '&' , nll5_bis.numpy()/N , '\n')
 
             x.append(X[j])
 
@@ -189,16 +195,16 @@ for j in tqdm(range(0 , idx)):
 
         X=np.linspace(x[0] , x[-1])
         #plt.plot(X , f1(X) , '-.' , color='red' , label='rand100')
-        #plt.plot(X , f2(X) , '-.' , color='darkorange' , label='rand200')
-        #plt.plot(X , f3(X) , '-.' , color='orange' , label='rand500')
-        plt.plot(X , f4(X) , '-.' , color='yellow' , label='rand1000')
-        plt.plot(X , f5(X) , '-.' , color='yellowgreen' , label='rand10000')
+        plt.plot(X , f2(X) , '-.' , color='darkorange' , label='rand500')
+        plt.plot(X , f3(X) , '-.' , color='orange' , label='rand1000')
+        plt.plot(X , f4(X) , '-.' , color='yellow' , label='rand2000')
+        plt.plot(X , f5(X) , '-.' , color='yellowgreen' , label='rand5000')
 
         #plt.plot(X , f1_bis(X) , '-.' , color='darkblue' , label='par100')
-        #plt.plot(X , f2_bis(X) , '-.' , color='blue' , label='par200')
-        #plt.plot(X , f3_bis(X) , '-.' , color='cyan' , label='par500')
-        plt.plot(X , f4_bis(X) , '-.' , color='magenta' , label='par1000')
-        plt.plot(X , f5_bis(X) , '-.' , color='pink' , label='par10000')
+        plt.plot(X , f2_bis(X) , '-.' , color='blue' , label='id500')
+        plt.plot(X , f3_bis(X) , '-.' , color='cyan' , label='id1000')
+        plt.plot(X , f4_bis(X) , '-.' , color='magenta' , label='id2000')
+        plt.plot(X , f5_bis(X) , '-.' , color='pink' , label='id5000')
        
         #plt.plot(X , f1000(X) , 'b-.', label='1000')
         #plt.plot(X , f1000(X) , 'c-.', label='1000')
@@ -207,13 +213,13 @@ for j in tqdm(range(0 , idx)):
         #plt.plot( x , y1  , 'k.' )
         #plt.plot( x , y2  , 'k.' )
         #plt.plot( x , y3  , 'k.' )
-        plt.plot( x , y4  , 'k.' )
+        #plt.plot( x , y4  , 'k.' )
         plt.plot( x , y5  , 'k.' )
 
         #plt.plot( x , y1_bis  , 'k.' )
         #plt.plot( x , y2_bis  , 'k.' )
         #plt.plot( x , y3_bis  , 'k.' )
-        plt.plot( x , y4_bis  , 'k.' )
+        #plt.plot( x , y4_bis  , 'k.' )
         plt.plot( x , y5_bis  , 'k.' )
 
 
@@ -225,20 +231,21 @@ for j in tqdm(range(0 , idx)):
         #plt.plot(x[int(np.floor(11/2))] , y3[int(np.floor(11/2))] , 'cD' )
         ymin, ymax = ax.get_ylim()
         ax.vlines(x[int(np.floor(11/2))] , min(y5_bis) , min(y5_bis)+0.0005)
-        ax.fill_between(X, f5_bis(X), min(y5_bis)+0.00005 , where= min(y5_bis)+0.00005 > f5_bis(X) , alpha=0.4, color='red' , label=r' $\sigma$')
-        ax.fill_between(X, f5_bis(X), min(y5_bis)+0.0001 , where= min(y5_bis)+0.0001 > f5_bis(X) , alpha=0.2, color='orange' , label=r' 2$\sigma$')
-        ax.fill_between(X, f5_bis(X), min(y5_bis)+0.00015 , where= min(y5_bis)+0.00015 > f5_bis(X) , alpha=0.1, color='yellow' , label=r' 3$\sigma$')
+
+        ax.fill_between(X, f5_bis(X), min(y5_bis)+sig , where= min(y5_bis)+sig > f5_bis(X) , alpha=0.4, color='red' , label=r' $\sigma$')
+        ax.fill_between(X, f5_bis(X), min(y5_bis)+2*sig , where= min(y5_bis)+2*sig > f5_bis(X) , alpha=0.2, color='orange' , label=r' 2$\sigma$')
+        ax.fill_between(X, f5_bis(X), min(y5_bis)+3*sig , where= min(y5_bis)+3*sig > f5_bis(X) , alpha=0.1, color='yellow' , label=r' 3$\sigma$')
 
         #plt.plot(x[np.argmin(y1)] , min(y1) , 'r.' )
         #plt.plot(x[np.argmin(y2)] , min(y2) , 'r.' )
         #plt.plot(x[np.argmin(y3)] , min(y3) , 'r.' )
-        plt.plot(x[np.argmin(y4)] , min(y4) , 'r.' )
+        #plt.plot(x[np.argmin(y4)] , min(y4) , 'r.' )
         plt.plot(x[np.argmin(y5)] , min(y5) , 'r.' )
 
         #plt.plot(x[np.argmin(y1_bis)] , min(y1_bis) , 'r.' )
         #plt.plot(x[np.argmin(y2_bis)] , min(y2_bis) , 'r.' )
         #plt.plot(x[np.argmin(y3_bis)] , min(y3_bis) , 'r.' )
-        plt.plot(x[np.argmin(y4_bis)] , min(y4_bis) , 'r.' )
+        #plt.plot(x[np.argmin(y4_bis)] , min(y4_bis) , 'r.' )
         plt.plot(x[np.argmin(y5_bis)] , min(y5_bis) , 'r.' )
 
         """
@@ -247,15 +254,21 @@ for j in tqdm(range(0 , idx)):
         plt.plot(x[np.argmin(y1_bis)] , min(y1_bis) , 'bo'  )
         """
 
-        title = ax.set_title('Expected Value:'+str(format( Coeff0[j], '.3f'))+ '      Migrad500:' +str(format( x[np.argmin(y3)], '.3f')) + '\n'+'      Migrad1000:' +str(format( x[np.argmin(y4)], '.3f')) + '      Migrad10000:' +str(format( x[np.argmin(y5)], '.3f')) )
-        ax.set_ylim([min(y5_bis)-0.00001 , min(y5_bis)+0.001])
+
+
+
+        title = ax.set_title('Expected Value:'+str(format( Coeff0[j], '.3f'))+ '      rand2000:' +str(format( x[np.argmin(y5)], '.3f')) + '\n'+'      id2000:' +str(format( x[np.argmin(y5_bis)], '.3f'))  )
+        
+        ymin=min(y5_bis)
+        ymax=max(y5_bis)
+        ax.set_ylim([ymin-2*sig , ymin+20*sig])
         #+r'$\pm$'+str(format(B[j], '.4f')) +
         #ax.vlines( toy1.coeffs[j]  , ymin , ymax , label='MC value')
         #plt.show()
         
         #ax.fill_between(X, f1(X), 0.5 , where=0.5 > f1(X) , alpha=0.5, color='red') 
 
-        ax.legend()
+        #ax.legend()
         ax.set(xlabel=LaTex[j], ylabel=r' NLL')        #ax.axhspan(ymin, 0.5, alpha=0.1, color='red' , label= r'$\pm \sigma$')        
         plt.subplots_adjust(top=0.9)
         plt.savefig(path+Title[j]+'.png')

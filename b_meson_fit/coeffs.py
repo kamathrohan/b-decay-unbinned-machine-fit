@@ -5,6 +5,7 @@ Fit and signal are in the fixed basis where Im(A_perp_r) = Im(A_zero_l) = Re(A_z
 """
 import itertools
 import tensorflow.compat.v2 as tf
+import numpy as np
 tf.enable_v2_behavior()
 
 # Models for our signal coeffs
@@ -165,7 +166,7 @@ def signal(model):
     return [tf.constant(_p) for _a in _signal_coeffs[model] for _c in _a for _p in _c]
 
 
-def fit(initialization=fit_initialization_scheme_default, current_signal_model=None, fix_p_wave_model=None):
+def fit(initialization=fit_initialization_scheme_default ,current_signal_model=None, fix= None , fix_p_wave_model=None):
     """Construct a flat list of tensors to represent what we're going to fit
 
     Tensors that represent non-fixed coefficients in this basis are tf.Variables
@@ -184,9 +185,18 @@ def fit(initialization=fit_initialization_scheme_default, current_signal_model=N
     if current_signal_model is not None and current_signal_model not in signal_models:
         raise ValueError('current_signal_model {} unknown'.format(current_signal_model))
     current_signal_coeffs = signal(current_signal_model) if current_signal_model is not None else None
+        
     if fix_p_wave_model is not None and fix_p_wave_model not in signal_models:
         raise ValueError('fix_p_wave_model {} unknown'.format(fix_p_wave_model))
     fix_p_wave_coeffs = signal(fix_p_wave_model) if fix_p_wave_model is not None else None
+
+
+    if fix is not None and len(fix)==count: 
+        listtt=[not i for i in fix]
+        xx=np.where(listtt)[0]
+        fit_idxs=xx
+    else :
+        fit_idxs=fit_trainable_idxs
 
     max_signal_coeffs = [0.0] * count
     for signal_model in signal_models:
@@ -201,7 +211,7 @@ def fit(initialization=fit_initialization_scheme_default, current_signal_model=N
         if i <= p_wave_idxs[-1] and fix_p_wave_coeffs is not None:
             # This is a P-wave coeff and we've been told to copy a signal value
             coeff = tf.constant(fix_p_wave_coeffs[i])
-        elif i in fit_trainable_idxs:
+        elif i in fit_idxs:
             if initialization == FIT_INIT_TWICE_LARGEST_SIGNAL_SAME_SIGN:
                 # Initialize coefficient from 0 to 2x largest value in all signal models
                 init_value = tf.random.uniform(
@@ -227,9 +237,8 @@ def fit(initialization=fit_initialization_scheme_default, current_signal_model=N
 
             coeff = tf.Variable(init_value, name=names[i])
         else:
-            coeff = tf.constant(0.0)
+            coeff = tf.constant(current_signal_coeffs[i].numpy())
         fit_coeffs.append(coeff)
-
     return fit_coeffs
 
 
