@@ -491,7 +491,7 @@ def integrate_decay_rate(coeffs):
     """
     return bmfi.trapezoid(
         lambda q2: decay_rate_angle_integrated(coeffs, q2),
-        q2_min,
+        q2_min, 
         q2_max,
         integration_dt
     )
