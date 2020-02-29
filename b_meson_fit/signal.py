@@ -131,7 +131,7 @@ def generate_background(coeffs, events_total=100_000, batch_size=10_000_000):
     events_found = 0
 
     # Find the integrated decay rate so we can normalise our decay rates to probabilities
-    norm = integrate_decay_rate(coeffs)
+    #norm = integrate_decay_rate(coeffs)
 
     # Distributions for our independent variables
     q2_dist = tfp.distributions.Uniform(low=q2_min, high=q2_max)
