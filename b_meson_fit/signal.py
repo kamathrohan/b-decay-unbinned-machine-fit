@@ -175,7 +175,13 @@ def generate_background(coeffs, events_total=100_000, batch_size=10_000_000):
 def generate_signal_mass(coeffs, events_total=100_000, batch_size=10_000_000):
     events = generate(coeffs,events_total,batch_size)
     massy = mass.signal_mass_generator(events_total)
-    events = tf.stack([events,massy])
+    events = tf.concat([events,massy], axis = 1)
+    return events
+
+def generate_background_mass(coeffs, events_total=100_000, batch_size=10_000_000):
+    events = generate_background(coeffs,events_total,batch_size)
+    massy = mass.background_mass_generator(events_total)
+    events = tf.concat([events,massy], axis = 1)
     return events
 
 
