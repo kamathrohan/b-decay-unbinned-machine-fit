@@ -1,5 +1,6 @@
 """Contains signal probability functions"""
 import math
+import numpy as np
 import tensorflow.compat.v2 as tf
 import tensorflow_probability as tfp
 import b_meson_fit.breit_wigner as bmfbw
@@ -113,7 +114,7 @@ def generate(coeffs, events_total=100_000, batch_size=10_000_000):
     # Bolt our event tensors together and limit to returning events_total rows
     return tf.concat(events, axis=0)[0:events_total, :]
 
-def generate_background(coeffs, events_total=100_000, batch_size=10_000_000):
+def generate_background(coeffs, events_total=20_000, batch_size=100_000):
     """
     Generate sample events based on particular amplitude coefficients
 
@@ -154,7 +155,7 @@ def generate_background(coeffs, events_total=100_000, batch_size=10_000_000):
             axis=1
         )
         # Get a list of probabilities for each event with shape(batch_size,)
-        probabilities = bkg.pdf(coeffs,events)
+        probabilities = bkg.pdf(coeffs,candidates)
 
         # Get a uniform distribution of numbers between 0 and 1 with shape (batch_size,)
         uniforms = uniform_dist.sample(batch_size)
@@ -171,6 +172,7 @@ def generate_background(coeffs, events_total=100_000, batch_size=10_000_000):
 
     # Bolt our event tensors together and limit to returning events_total rows
     return tf.concat(events, axis=0)[0:events_total, :]
+
 
 def generate_signal_mass(coeffs, events_total=100_000, batch_size=10_000_000):
     events = generate(coeffs,events_total,batch_size)
@@ -570,6 +572,7 @@ def integrate_decay_rate(coeffs):
         q2_max,
         integration_dt
     )
+
 
 
 def coeffs_to_amplitudes(coeffs, q2):
