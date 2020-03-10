@@ -38,7 +38,7 @@ def exnll(sig_coeffs,back_coeffs,n_sig,n_back,events):
             +n_back*backg
         )
     )
-    poisson_counting = (-1*tf.shape(events)[0]*tf.math.log(n_sig + n_back))+ n_sig + n_back
+    poisson_counting = (-1*(tf.shape(events)[0].numpy())*tf.math.log(n_sig + n_back))+ n_sig + n_back
 
     return (likelihood + poisson_counting)
 
