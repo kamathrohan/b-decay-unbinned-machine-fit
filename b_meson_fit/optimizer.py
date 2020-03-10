@@ -95,9 +95,6 @@ class Optimizer:
         return normalized_nll, grads, tf.math.abs(tf.reduce_max(grads))
 
 
-
-
-
     def _normalized_nll(self):
         """Get the normalized negative log likelihood
 
@@ -108,10 +105,6 @@ class Optimizer:
             Scalar tensor
         """
         return bmfs.normalized_nll(self.fit_coeffs, self.signal_events)
-
-      
-
-        
      
 
     def get_hessian(self):

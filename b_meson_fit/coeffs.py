@@ -198,6 +198,7 @@ def fit(initialization=fit_initialization_scheme_default ,current_signal_model=N
     else :
         fit_idxs=fit_trainable_idxs
 
+
     max_signal_coeffs = [0.0] * count
     for signal_model in signal_models:
         signal_coeffs = [_p for _a in _signal_coeffs[signal_model] for _c in _a for _p in _c]
@@ -229,15 +230,19 @@ def fit(initialization=fit_initialization_scheme_default ,current_signal_model=N
             elif initialization == FIT_INIT_CURRENT_SIGNAL:
                 # Initialize coefficient to the value in this signal model
                 init_value = current_signal_coeffs[i]
-            elif isinstance(initialization, float):
+            elif isinstance(initialization, list):
                 # Initialize coefficient to the specified value (Useful for testing)
-                init_value = initialization
+                init_value = initialization[i]
             else:
                 raise ValueError('Initialization scheme {} is undefined'.format(initialization))
 
             coeff = tf.Variable(init_value, name=names[i])
         else:
-            coeff = tf.constant(current_signal_coeffs[i].numpy())
+            if isinstance(initialization , list) and fix is not None :
+                coeff = tf.constant(initialization[i] , tf.float32)
+                #print('coefini and fix given ')
+            else : 
+                coeff = tf.constant(current_signal_coeffs[i].numpy())
         fit_coeffs.append(coeff)
     return fit_coeffs
 
