@@ -25,10 +25,15 @@ bw_k700_k892 = bmfbw.k700_k892_distribution_integrated()
 
 
 
-def exnll(sig_coeffs,back_coeffs,n_sig,n_back,events):
+def exnll(coeffs,events):
+    Inputt = iter(coeffs) 
+    splits = [48,8,1,1,1]
+    sig_coeffs,back_coeffs,nbar_dat,n_back,alpha = [list(islice(Inputt, elem)) for elem in splits] #this may break
     """
     Extended likelihood fit: ref petredis, patel et all for more!
+    Events: Nx5
     """
+    n_sig = nbar_dat*alpha
     events_angles, events_mass = tf.split(events,[4,1],axis = 1)
     signal = pdf(sig_coeffs,events_angles)*mass.signal_mass(events_mass)
     backg = bkg.pdf(back_coeffs,events_angles)*mass.background_mass(events_mass)
@@ -132,6 +137,16 @@ def generate(coeffs, events_total=100_000, batch_size=10_000_000 ):
     # Bolt our event tensors together and limit to returning events_total rows
     return tf.concat(events, axis=0)[0:events_total, :]
 
+def generate_all(sig_coeffs, back_coeffs,events_total, alpha = 0.8, poisson = False):
+        if poisson:
+            eventspoisson = np.random.poisson(events_total, 1)
+        else:
+            eventspoisson = events_total
+    sig_events = generate_signal_mass(sig_coeffs,events_total=int(alpha*eventspoisson))
+    back_events = generate_background_mass(back_coeffs,events_total = int((1-alpha)*eventspoisson))
+    events = tf.concat([sig_events,back_events],axis = 0)
+    return events 
+
 def generate_background(coeffs, events_total=20_000, batch_size=100_000):
     """
     Generate sample events based on particular amplitude coefficients
@@ -190,7 +205,6 @@ def generate_background(coeffs, events_total=20_000, batch_size=100_000):
 
     # Bolt our event tensors together and limit to returning events_total rows
     return tf.concat(events, axis=0)[0:events_total, :]
-
 
 def generate_signal_mass(coeffs, events_total=100_000, batch_size=10_000_000):
     events = generate(coeffs,events_total,batch_size)
@@ -560,7 +574,6 @@ def integrate_decay_rate(coeffs):
         q2_max,
         integration_dt
     )
-
 
 def coeffs_to_amplitudes(coeffs, q2):
     """
