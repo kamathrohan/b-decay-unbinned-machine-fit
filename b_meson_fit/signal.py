@@ -29,9 +29,9 @@ def exnll(sig_coeffs,back_coeffs,n_sig,n_back,events):
     """
     Extended likelihood fit: ref petredis, patel et all for more!
     """
-
-    signal = pdf(sig_coeffs,events)
-    backg = bkg.pdf(back_coeffs,events)
+    events_angles, events_mass = tf.split(events,[4,1],axis = 1)
+    signal = pdf(sig_coeffs,events_angles)*mass.signal_mass(events_mass)
+    backg = bkg.pdf(back_coeffs,events_angles)*mass.background_mass(events_mass)
 
     likelihood = -tf.reduce_sum(
         tf.math.log(
