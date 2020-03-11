@@ -1,6 +1,5 @@
 """Class to do optimization"""
 import tensorflow.compat.v2 as tf
-
 import b_meson_fit.coeffs as bmfc
 import b_meson_fit.signal as bmfs
 import numpy as np
@@ -140,7 +139,6 @@ class Optimizer:
         
 
         hess=tf.stack(grad_grads)
-
         return hess          
      
 	
