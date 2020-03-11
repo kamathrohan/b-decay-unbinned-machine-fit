@@ -73,7 +73,7 @@ def normalized_nll(coeffs, events):
     """
     return nll(coeffs, events) / tf.cast(tf.shape(events)[0], tf.float32)
 
-def generate(coeffs, events_total=100_000, batch_size=10_000_000):
+def generate(coeffs, events_total=100_000, batch_size=10_000_000 ):
     """
     Generate sample events based on particular amplitude coefficients
 
@@ -173,7 +173,7 @@ def generate_background(coeffs, events_total=20_000, batch_size=100_000):
             axis=1
         )
         # Get a list of probabilities for each event with shape(batch_size,)
-        probabilities = bkg.pdf(coeffs,candidates)
+        probabilities = bkg.pdfnorm(coeffs,candidates)
 
         # Get a uniform distribution of numbers between 0 and 1 with shape (batch_size,)
         uniforms = uniform_dist.sample(batch_size)

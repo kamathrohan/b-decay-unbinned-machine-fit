@@ -11,12 +11,13 @@ import b_meson_fit as bmf
 tf.enable_v2_behavior()
 
 with bmf.Script() as script:
+    '''
     if not bmf.user_is_root():
         bmf.stderr('This script needs root permissions. You can run it from the project folder with:')
         bmf.stderr(
             'sudo -E --preserve-env=PYTHONPATH ./bin/profile.py')
         exit(1)
-
+    '''
     log = bmf.Log(script.name)
 
     signal_coeffs = bmf.coeffs.signal(bmf.coeffs.SM)

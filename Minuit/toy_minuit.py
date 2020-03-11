@@ -37,21 +37,23 @@ class toy:
         elif self.model == 'NP' :
             signal_coeffs = bmf.coeffs.signal(bmf.coeffs.NP)
             self.coeffs =[i.numpy() for i in signal_coeffs] 
+        else :
+            raise ValueError('current signal model unknown')
 
         if verbose:  
             print("Ideal coeffs for ", self.model , ' : ', self.coeffs )
         
         t0=time.time()
-        if frac_background is not None and len(coeff_background.flatten())== 8 : 
-            n_bck = np.round(events*frac_background)
-            n_signal = events - n_bck
-            signal = bmfs.generate(signal_coeffs, events_total=n_signal, batch_size=1_000_000)   
-            bck = bmfs.generate_background(coeff_background ,  events_total=n_bck, batch_size=10_000_000).numpy()
+        if frac_background is not None and sum(len(CoeffBCK) for CoeffBCK in coeff_background)== 8 : 
+            n_bck = int(np.round(events*frac_background))
+            n_signal = int(events - n_bck)
+            signal = bmfs.generate(signal_coeffs, events_total=n_signal, batch_size=10_000_000)   
+            bck = bmfs.generate_background(coeff_background ,  events_total=n_bck, batch_size=10_000_000)
             self.events = tf.concat([signal , bck] , 0)[0:events, :]
         elif frac_background is not None and not isinstance(frac_background , float)  :  
             raise ValueError('frac_background must be a float')
         else : 
-            self.events = bmfs.generate(self.coeffs , events_total=events, batch_size=10_000_000).numpy()
+            self.events = bmfs.generate(self.coeffs , events_total=events, batch_size=10_000_000)
 
         
         t1=time.time()
@@ -60,11 +62,7 @@ class toy:
         
         if verbose:
             print("Time taken to generate data:", t1-t0)
-
-        else :
-            raise ValueError('current signal model unknown')
         
-
     
     def nll_iminuit(self,signal_coeffs):
         return bmfs.nll(signal_coeffs,self.events)
@@ -120,7 +118,6 @@ class toy:
             j+=1
             if optimizer.converged() == True :
                 converged= True 
-            
 
         tfCoeff=[optimizer.fit_coeffs[i].numpy() for i in range(len(optimizer.fit_coeffs))]
         self.coeff_fit=tfCoeff

@@ -166,7 +166,7 @@ def signal(model):
     return [tf.constant(_p) for _a in _signal_coeffs[model] for _c in _a for _p in _c]
 
 
-def fit(initialization=fit_initialization_scheme_default ,current_signal_model=None, fix= None , fix_p_wave_model=None):
+def fit(initialization=fit_initialization_scheme_default ,current_signal_model=None , fix= None , fix_p_wave_model=None):
     """Construct a flat list of tensors to represent what we're going to fit
 
     Tensors that represent non-fixed coefficients in this basis are tf.Variables
