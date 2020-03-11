@@ -7,6 +7,7 @@ import b_meson_fit.breit_wigner as bmfbw
 import b_meson_fit.integrate as bmfi
 import b_meson_fit.background as bkg
 import b_meson_fit.mass as mass
+from itertools import islice 
 
 tf.enable_v2_behavior()
 
@@ -137,11 +138,11 @@ def generate(coeffs, events_total=100_000, batch_size=10_000_000 ):
     # Bolt our event tensors together and limit to returning events_total rows
     return tf.concat(events, axis=0)[0:events_total, :]
 
-def generate_all(sig_coeffs, back_coeffs,events_total, alpha = 0.8, poisson = False):
-        if poisson:
-            eventspoisson = np.random.poisson(events_total, 1)
-        else:
-            eventspoisson = events_total
+def generate_all(sig_coeffs, back_coeffs,events_total=100000, alpha = 0.8, poisson = False):
+    if poisson:
+        eventspoisson = np.random.poisson(events_total, 1)
+    else:
+        eventspoisson = events_total
     sig_events = generate_signal_mass(sig_coeffs,events_total=int(alpha*eventspoisson))
     back_events = generate_background_mass(back_coeffs,events_total = int((1-alpha)*eventspoisson))
     events = tf.concat([sig_events,back_events],axis = 0)

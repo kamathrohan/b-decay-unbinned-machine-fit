@@ -13,9 +13,8 @@ def background_mass_generator(n):
     return background_mass
 
 
-def signal_mass(mass,mean,sig):
+def signal_mass(mass,mean = 4,sig = 1 ):
     return (np.exp(-np.power(mass - mean, 2.) / (2 * np.power(sig, 2.))))/(sig*np.sqrt(2*np.pi))
 
-def background_mass(mass,scale):
+def background_mass(mass,scale = 1 ):
     return np.exp(-1*mass/scale)/scale
-    
