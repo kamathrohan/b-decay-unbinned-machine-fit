@@ -10,7 +10,11 @@ alpha = tf.constant(0.8)
 ndat = tf.constant(1000000)
 nback = tf.Variable(10000)
 
-
+"""
 coeffs = [*sig_coeffs,*back_coeffs,alpha,ndat,nback]
 for i in coeffs:
     print(bmf.coeffs.is_trainable(i))
+"""
+
+events = bmf.signal.generate_all(sig_coeffs,back_coeffs,events_total=10000)
+print(events)
