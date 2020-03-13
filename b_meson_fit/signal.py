@@ -34,11 +34,14 @@ def exnll(coeffs,events):
     Extended likelihood fit: ref petredis, patel et all for more!
     Events: Nx5
     """
+    alpha = alpha[0]
+    nbar_dat = nbar_dat[0]
+    n_back = n_back[0]
     n_sig = nbar_dat*alpha
     events_angles, events_mass = tf.split(events,[4,1],axis = 1)
-    signal = pdf(sig_coeffs,events_angles)*mass.signal_mass(events_mass)
-    backg = bkg.pdf(back_coeffs,events_angles)*mass.background_mass(events_mass)
-
+    signal = tf.math.multiply(pdf(sig_coeffs,events_angles),tf.reshape(tf.convert_to_tensor(mass.signal_mass(events_mass), dtype = tf.float32),[tf.shape(events_mass)[0],]))
+    backg = tf.math.multiply(bkg.pdf(back_coeffs,events_angles),tf.reshape(tf.convert_to_tensor(mass.background_mass(events_mass), dtype = tf.float32),[tf.shape(events_mass)[0],]))
+   
     likelihood = -tf.reduce_sum(
         tf.math.log(
             n_sig*signal
