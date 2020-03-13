@@ -39,6 +39,7 @@ def exnll(coeffs,events):
     n_back = n_back[0]
     n_sig = nbar_dat*alpha
     events_angles, events_mass = tf.split(events,[4,1],axis = 1)
+
     signal = tf.math.multiply(pdf(sig_coeffs,events_angles),tf.reshape(tf.convert_to_tensor(mass.signal_mass(events_mass), dtype = tf.float32),[tf.shape(events_mass)[0],]))
     backg = tf.math.multiply(bkg.pdf(back_coeffs,events_angles),tf.reshape(tf.convert_to_tensor(mass.background_mass(events_mass), dtype = tf.float32),[tf.shape(events_mass)[0],]))
    
@@ -48,7 +49,7 @@ def exnll(coeffs,events):
             +n_back*backg
         )
     )
-    poisson_counting = (-1*(tf.shape(events)[0].numpy())*tf.math.log(n_sig + n_back))+ n_sig + n_back
+    poisson_counting = (-1*tf.math.multiply(tf.cast(tf.shape(events)[0],dtype = 'float32'),tf.math.log(n_sig + n_back)))+ n_sig + n_back
 
     return (likelihood + poisson_counting)
 
