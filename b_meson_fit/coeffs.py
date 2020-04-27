@@ -198,7 +198,6 @@ def fit(initialization=fit_initialization_scheme_default ,current_signal_model=N
     else :
         fit_idxs=fit_trainable_idxs
 
-
     max_signal_coeffs = [0.0] * count
     for signal_model in signal_models:
         signal_coeffs = [_p for _a in _signal_coeffs[signal_model] for _c in _a for _p in _c]

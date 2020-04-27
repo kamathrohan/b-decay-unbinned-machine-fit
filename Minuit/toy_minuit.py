@@ -20,9 +20,11 @@ class toy:
         self.coeffs = [] #Model coeffs
         self.events = [] #generated events
         self.coeff_fit = [] #fitted coefficients 
+        self.coeff_init = []
         self.NLL0=0
         self.NLL=0
         self.FIX=fix_array
+
         
     def get_coeffs(self):
         return self.coeffs
@@ -87,7 +89,7 @@ class toy:
         else:
             raise ValueError("Events already generated!")
 
-    def tf_fit(self, Ncall=None, init= 'DEFAULT' , fixed=None , coefini=None , verbose = False):
+    def tf_fit(self, Ncall=None, init= 'DEFAULT' , fixed=None , coefini=None , verbose = False , opt_params=None):
         if init ==None or init == 'DEFAULT' : 
             A=bmf.coeffs.fit(bmf.coeffs.fit_initialization_scheme_default , current_signal_model= self.model , fix=fixed)
         
@@ -102,10 +104,15 @@ class toy:
         events=tf.convert_to_tensor(self.events)
 
 
+        if verbose:
+            print('\n', "Coeffs used for MC:", self.coeffs)
+            print("Initial coeffs for tensorflow fit:", [A[j].numpy() for j in range(len(A))])
 
-        optimizer = bmf.Optimizer( A, events, opt_name='AMSGrad', learning_rate=0.20, opt_params=None, grad_clip=None, grad_max_cutoff=5e-6 )  
+        self.coeff_init = [A[i].numpy() for i in range(len(A))]
+        optimizer = bmf.Optimizer( A, events, opt_name='AMSGrad', learning_rate=0.20, opt_params=opt_params )  
         converged = False
         j=0
+        t0=time.time()
         while converged == False :
             optimizer.minimize()
             if Ncall is not None and j>Ncall:
@@ -117,11 +124,14 @@ class toy:
             j+=1
             if optimizer.converged() == True :
                 converged= True 
+        t1=time.time()            
 
         tfCoeff=[optimizer.fit_coeffs[i].numpy() for i in range(len(optimizer.fit_coeffs))]
         self.coeff_fit=tfCoeff
         self.NLL=self.nll_iminuit(tfCoeff)
-
+        if verbose:
+            print('\n', ' Fitted coefficients : ' , self.coeff_fit)
+            print( '\n', "Time taken to fit :", t1-t0)
         return optimizer , tfCoeff 
 
     
@@ -155,20 +165,20 @@ class toy:
         if verbose:
             print('\n', "Coeffs used for MC:", self.coeffs)
             print("Initial coeffs for minuit fit:", Coef_INIT)
-
+        self.coeff_init = Coef_INIT
         m = Minuit.from_array_func(self.nll_iminuit,Coef_INIT, fix= fixed , errordef=0.5, pedantic = False)
+        
         t0=time.time()
-        m_final=m.migrad( ncall=Ncall)
+        m_final=m.migrad( ncall=Ncall )
 
 
-        t1=time.time()
-        if verbose:
-            print("Time taken to fit :", t1-t0)
+        t1=time.time()            
         ##   Print fit results 
         self.coeff_fit=[m.values[i] for i in range(len(m.values))]
         self.NLL=self.nll_iminuit(self.coeff_fit)
         if verbose:
             print('\n', ' Fitted coefficients : ' , self.coeff_fit)
+            print( '\n', "Time taken to fit :", t1-t0)
         return m , self.coeff_fit 
 
 

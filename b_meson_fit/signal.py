@@ -30,6 +30,12 @@ def exnll(coeffs,events):
     Inputt = iter(coeffs) 
     splits = [48,8,1,1,1]
     sig_coeffs,back_coeffs,nbar_dat,n_back,alpha = [list(islice(Inputt, elem)) for elem in splits] #this may break
+    print(sig_coeffs)
+    print(back_coeffs)
+    print(nbar_dat)
+    print(n_back)
+    print(alpha)
+
     """
     Extended likelihood fit: ref petredis, patel et all for more!
     Events: Nx5
