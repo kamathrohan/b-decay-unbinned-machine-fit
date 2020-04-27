@@ -5,7 +5,6 @@ import numpy as np
 
 tf.enable_v2_behavior()
 
-
 class Optimizer_Extended:
     # AMSGrad is used as the optimizer as Adam suffers from exploding gradients on the earlier converged
     #  converged coefficients before all have converged.

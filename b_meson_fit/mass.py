@@ -13,10 +13,10 @@ def background_mass_generator(n):
     return background_mass
 
 
-def signal_mass(mass,mean = 4,sig = 1 ):
-    signalM=(np.exp(-np.power(mass - mean, 2.) / (2 * np.power(sig, 2.))))/(sig*np.sqrt(2*np.pi))
-    return tf.reshape(signalM , [len(signalM),])
+def signal_mass(mass,mean = 4.,sig = 1. ):
+    massprob = tf.exp(-tf.math.square(mass - mean) / (2 * tf.math.square(sig)))/(sig*tf.sqrt(2*np.pi)) 
+    return tf.reshape(tf.convert_to_tensor(massprob, dtype = tf.float32),[tf.shape(mass)[0],])
 
-def background_mass(mass,scale = 1 ):
-    signalB=np.exp(-1*mass/scale)/scale
-    return tf.reshape(signalB , [len(signalB),])
+
+def background_mass(mass,scale = 1. ):
+    return tf.exp(-1*mass/scale)/scale
