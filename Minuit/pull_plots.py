@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
 import pandas as pd 
 import b_meson_fit as bmf 
-from test_iminuit import amplitude_latex_names ,amplitude_names, LaTex_labels , Standard_labels
-from toy_minuit import FIX
+from test_iminuit import amplitude_latex_names,amplitude_names, LaTex_labels , Standard_labels
+from test_iminuit import fix_array as FIX
 from scipy.stats import norm
 
 
@@ -31,14 +31,14 @@ def get_arrays(data , N):
 signal_coeffs = bmf.coeffs.signal(bmf.coeffs.SM)
 Coef0=[i.numpy() for i in signal_coeffs] 
 
-data = pd.read_csv("./Minuit/Test_stats/data_new.csv").values
+data = pd.read_csv("./Minuit/Test_stats/tfpulls.csv").values
 #data = np.vstack((dataP.values,dataI.values))
-values, errors = get_arrays(data, 1000)
+values, errors = get_arrays(data, 999)
 
 pulls=(values-Coef0)/errors
 for j in range(48) : 
     if FIX[j]==0 :
-        _ , ax = plt.subplots()
+        fig , ax = plt.subplots()
         pulls0=np.sort(pulls[:,j])
 
         #plt.hist(pulls0[20 : 1980] , bins=60 , color='r' , alpha= 0.3 , normed=True)
@@ -52,18 +52,17 @@ for j in range(48) :
         ax.set_title('Av value:'+str(format( av0, '.3f'))+'+/-'+str(format(std0, '.3f')))
 
         mu, sigma = norm.fit(pulls0)
+        print(sigma)
 
-        n, bins, patches = plt.hist(pulls0, bins=60 , color='r' , alpha= 0.6 , normed=True)
+        n, bins, patches = plt.hist(pulls0, bins=20 , color='r' , alpha= 0.6 , normed=True)
         y = mlab.normpdf(bins, mu, sigma)
         plt.plot(bins,y, 'r--')
+        plt.show()
 
+        """
         save_path = './Minuit/Plot_pulls/Plot_pulls_InitCurrent/'
         plt.title(LaTex[j]+'\n Mean Pull: '+str(mu)+" Sigma: "+str(sigma))
         plt.savefig(save_path+Title[j]+'.png')
         plt.close()
-    # plt.show()
-
-
-
-
-
+        # plt.show()
+        """
